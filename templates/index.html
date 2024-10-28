@@ -17,7 +17,6 @@
             text-align: center;
             font-size: 32px;
             color: #6a1b9a;
-            margin-bottom: 10px;
         }
         nav {
             display: flex;
@@ -35,76 +34,110 @@
         nav a:hover {
             background-color: #7b1fa2;
         }
-        .search-container {
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .search-container label {
-            font-weight: bold;
-        }
-        .search-container input[type="text"] {
-            padding: 8px;
-            margin-left: 10px;
-            border: 1px solid #d1c4e9;
-            border-radius: 4px;
-        }
         .item-type {
-            margin-top: 20px;
-            padding: 10px;
+            margin-top: 10px;
+            padding: 8px;
             background-color: #e1bee7;
             border-radius: 8px;
         }
         .item-type h3 {
             color: #4a148c;
             font-size: 18px;
-            margin-bottom: 5px;
+            margin: 0;
+        }
+        #review-section {
+            background-color: #e0e0e0;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
         }
         button {
-            font-size: 16px;
-            padding: 8px;
             background-color: #8e24aa;
             color: white;
             border: none;
             cursor: pointer;
             border-radius: 5px;
-            margin-top: 10px;
+            padding: 10px 20px;
         }
         button:hover {
             background-color: #7b1fa2;
         }
-        #total, #change {
-            font-weight: bold;
-            margin-top: 10px;
-            font-size: 18px;
-        }
     </style>
+    <script>
+        function updateReview() {
+            const reviewSection = document.getElementById('review-section');
+            reviewSection.innerHTML = '';
+            let total = 0;
+
+            document.querySelectorAll('.item-row').forEach(row => {
+                const checkbox = row.querySelector('input[type="checkbox"]');
+                if (checkbox.checked) {
+                    const price = parseFloat(checkbox.getAttribute('data-price'));
+                    const quantitySelect = document.createElement('select');
+                    quantitySelect.name = 'quantity';
+                    quantitySelect.onchange = calculateTotal;
+
+                    for (let i = 1; i <= 10; i++) { // Dropdown for quantities from 1 to 10
+                        const option = document.createElement('option');
+                        option.value = i;
+                        option.text = i;
+                        quantitySelect.appendChild(option);
+                    }
+
+                    const quantityContainer = document.createElement('div');
+                    quantityContainer.textContent = `${checkbox.dataset.name}: ₱${price} `;
+                    quantityContainer.appendChild(quantitySelect);
+                    reviewSection.appendChild(quantityContainer);
+                }
+            });
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            let total = 0;
+            document.querySelectorAll('#review-section select').forEach(select => {
+                const price = parseFloat(select.parentElement.textContent.split('₱')[1]);
+                total += price * (parseInt(select.value) || 1);
+            });
+            document.getElementById('total').innerText = 'Total: ₱' + total.toFixed(2);
+            calculateChange();
+        }
+
+        function calculateChange() {
+            const total = parseFloat(document.getElementById('total').innerText.replace('Total: ₱', '')) || 0;
+            const moneyReceived = parseFloat(document.getElementById('money_received').value) || 0;
+            const change = Math.max(0, moneyReceived - total);
+            document.getElementById('change').innerText = 'Change: ₱' + change.toFixed(2);
+        }
+
+        function validateForm(event) {
+            const moneyReceived = document.getElementById('money_received').value;
+            if (!moneyReceived || isNaN(moneyReceived) || Number(moneyReceived) <= 0) {
+                event.preventDefault(); // Prevent form submission
+                alert("Please enter a valid amount of money received.");
+            }
+        }
+    </script>
 </head>
 <body>
     <h1>H & S Ramyeon</h1>
 
     <nav>
-        <a href="/add_item">Add Item</a>
+        <a href="/add_item">Edit Items</a>
         <a href="/invoices">View Invoices</a>
     </nav>
 
-    <div class="search-container">
-        <label for="search">Find Item:</label>
-        <form method="POST" action="/">
-            <input type="text" id="search" name="search_query" onkeyup="this.form.submit()" placeholder="Search for items..." />
-        </form>
-    </div>
-
     <h2>Available Items</h2>
 
-    <form action="/make_transaction" method="POST">
+    <form action="/make_transaction" method="POST" onsubmit="validateForm(event)">
         {% for type in ['Soup Base', 'Stir Fry', 'Cups', 'Toppings', 'Sweets', 'Drinks'] %}
         <div class="item-type">
             <h3>{{ type }}</h3>
             <ul>
                 {% for item in items %}
                 {% if item['type'] == type %}
-                <li>
-                    <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
+                <li class="item-row">
+                    <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-name="{{ item['name'] }}" data-price="{{ item['price'] }}" onchange="updateReview()">
                     {{ item['name'] }}: ₱{{ item['price'] }}
                 </li>
                 {% endif %}
@@ -112,6 +145,10 @@
             </ul>
         </div>
         {% endfor %}
+
+        <div id="review-section">
+            <!-- Selected items with quantities will appear here -->
+        </div>
 
         <div id="total">Total: ₱0.00</div>
 
@@ -121,24 +158,5 @@
 
         <button type="submit">Make Transaction</button>
     </form>
-
-    <script>
-        function calculateTotal() {
-            const checkboxes = document.querySelectorAll('input[name="item_id"]:checked');
-            let total = 0;
-            checkboxes.forEach(checkbox => {
-                const price = parseFloat(checkbox.getAttribute('data-price'));
-                total += price;
-            });
-            document.getElementById('total').innerText = 'Total: ₱' + total.toFixed(2);
-        }
-
-        function calculateChange() {
-            const total = parseFloat(document.getElementById('total').innerText.replace('Total: ₱', '')) || 0;
-            const moneyReceived = parseFloat(document.getElementById('money_received').value) || 0;
-            const change = moneyReceived - total;
-            document.getElementById('change').innerText = 'Change: ₱' + change.toFixed(2);
-        }
-    </script>
 </body>
 </html>

@@ -52,21 +52,16 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            width: auto; /* Set width to auto for the button */
+            width: 100%; /* Set width to auto for the button */
         }
         .item-list {
             margin-top: 20px;
-        }
-        .item-type {
-            margin-top: 15px;
-            font-weight: bold;
-            font-size: 18px;
-            padding: 5px 0; /* Reduced padding for less space */
         }
         .item-entry {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 1px solid #d1c4e9;
             padding: 5px 0; /* Reduce padding for item entries */
         }
         .edit-button {
@@ -109,15 +104,7 @@
 
     <div class="item-list">
         <h3>Existing Items</h3>
-        {% set current_type = None %}
         {% for item in items %}
-            {% if current_type != item['type'] %}
-                {% if current_type is not none %}
-                    <!-- No additional separation needed -->
-                {% endif %}
-                <div class="item-type">{{ item['type'] }}</div>
-                {% set current_type = item['type'] %}
-            {% endif %}
             <div class="item-entry">
                 <span>{{ item['name'] }} - ₱{{ item['price'] }}</span>
                 <form action="/edit_item/{{ item['id'] }}" method="GET" style="display: inline;">

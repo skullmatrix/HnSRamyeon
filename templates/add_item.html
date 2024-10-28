@@ -61,8 +61,7 @@
             margin-top: 15px;
             font-weight: bold;
             font-size: 18px;
-            border-bottom: 2px solid #d1c4e9; /* Optional: add a bottom border for better separation */
-            padding-bottom: 5px; /* Space below the type heading */
+            padding: 5px 0; /* Reduced padding for less space */
         }
         .item-entry {
             display: flex;
@@ -113,7 +112,7 @@
         {% for item in items %}
             {% if current_type != item['type'] %}
                 {% if current_type is not none %}
-                    <hr> <!-- Optional: add a horizontal line to separate types -->
+                    <!-- No additional separation needed -->
                 {% endif %}
                 <div class="item-type">{{ item['type'] }}</div>
                 {% set current_type = item['type'] %}

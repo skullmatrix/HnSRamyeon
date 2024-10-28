@@ -52,21 +52,7 @@ initialize_database()
 def index():
     conn = get_db_connection()
     
-    # If form submitted, add item to the database
-    if request.method == 'POST':
-        name = request.form['name']
-        price = float(request.form['price'])
-        type = request.form['type']
-        item_id = request.form.get('item_id')  # Get the item ID if it exists
-        
-        if item_id:  # If editing an existing item
-            conn.execute('UPDATE items SET name = ?, price = ?, type = ? WHERE id = ?', (name, price, type, item_id))
-        else:  # If adding a new item
-            conn.execute('INSERT INTO items (name, price, type) VALUES (?, ?, ?)', (name, price, type))
-        
-        conn.commit()
-    
-    # Fetch the updated list of items, sorted by type
+    # Fetch all items from the database, sorted by type
     items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
     conn.close()
     return render_template('index.html', items=items)
@@ -74,8 +60,6 @@ def index():
 @app.route('/add_item', methods=['GET', 'POST'])
 def add_item():
     conn = get_db_connection()
-    items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()  # Fetch existing items for display
-    conn.close()
     
     if request.method == 'POST':
         name = request.form['name']
@@ -83,7 +67,6 @@ def add_item():
         type = request.form['type']
         item_id = request.form.get('item_id')  # Get the item ID if it exists
         
-        conn = get_db_connection()
         if item_id:  # If editing an existing item
             conn.execute('UPDATE items SET name = ?, price = ?, type = ? WHERE id = ?', (name, price, type, item_id))
         else:  # If adding a new item
@@ -92,7 +75,10 @@ def add_item():
         conn.commit()
         conn.close()
         return redirect(url_for('index'))  # Redirect back to the main page
-
+    
+    # Fetch existing items for display on the Add Item page
+    items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
+    conn.close()
     return render_template('add_item.html', items=items)  # Render the add/edit item page
 
 @app.route('/edit_item/<int:item_id>', methods=['GET'])

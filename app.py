@@ -117,6 +117,7 @@ def add_item():
         conn.close()
         return redirect(url_for('add_item'))
 
+    # Fetch and sort items for the Edit Items page
     items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
     conn.close()
     return render_template('add_item.html', items=items)

@@ -161,14 +161,17 @@
             document.getElementById('change').textContent = 'Change: ₱' + (change >= 0 ? change.toFixed(2) : 0);
         }
 
-        function promptForMoney() {
-            const total = document.getElementById('total').textContent.replace('Total: ₱', '');
-            const moneyReceived = prompt(`Total is ₱${total}. Please enter the amount of money received:`);
+        function makeTransaction() {
+            const total = parseFloat(document.getElementById('total').textContent.replace('Total: ₱', '')) || 0;
+            const moneyReceived = parseFloat(document.getElementById('money_received').value) || 0;
 
-            if (moneyReceived) {
-                document.getElementById('money_received').value = parseFloat(moneyReceived);
-                calculateChange(); // Update change display
+            if (moneyReceived < total) {
+                alert('Insufficient amount. Please enter a valid amount.');
+                return;
             }
+
+            // Proceed with the transaction (you might want to submit the form here)
+            document.forms[0].submit(); // Submit the form
         }
     </script>
 </head>
@@ -213,7 +216,7 @@
         
         <div id="change">Change: ₱0.00</div>
 
-        <button type="button" onclick="promptForMoney()">Make Transaction</button>
+        <button type="button" onclick="makeTransaction()">Make Transaction</button>
     </form>
 </body>
 </html>

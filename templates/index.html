@@ -4,60 +4,82 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>H&S Ramyeon</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
+            font-family: 'Arial', sans-serif;
+            max-width: 800px;
             margin: auto;
-            padding: 15px;
+            padding: 20px;
             background-color: #f4f4f9;
         }
         h1 {
             text-align: center;
             color: #d9534f;
-            font-size: 24px;
+            font-size: 28px;
+            margin-bottom: 10px;
         }
         nav {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            text-align: center;
         }
         nav a {
-            margin-right: 15px;
+            margin: 0 15px;
             text-decoration: none;
             color: #5bc0de;
+            font-weight: bold;
+        }
+        nav a:hover {
+            text-decoration: underline;
         }
         .item-type {
-            margin-top: 10px;
-            padding: 8px;
+            margin-top: 20px;
+            padding: 10px;
             background-color: #e9ecef;
             border-radius: 5px;
         }
         .item-type h3 {
-            margin: 0; /* Remove default margin */
-            font-size: 18px; /* Smaller font size for type headings */
+            margin: 0;
+            font-size: 20px;
+            color: #333;
         }
         #total, #change {
             font-weight: bold;
-            margin-top: 5px;
+            margin-top: 10px;
+            font-size: 18px;
         }
         label {
             font-weight: bold;
             margin-right: 5px;
         }
-        input[type="number"] {
-            width: 80px;
-            padding: 5px;
+        input[type="number"], input[type="text"], select {
+            width: calc(100% - 120px);
+            padding: 8px;
             margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
         button {
-            padding: 8px 12px;
+            padding: 10px 15px;
             background-color: #5bc0de;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            font-size: 16px;
         }
         button:hover {
             background-color: #31b0d5;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .item {
+            padding: 5px 0;
+        }
+        .item input[type="checkbox"] {
+            margin-right: 10px;
         }
     </style>
     <script>
@@ -99,7 +121,7 @@
             <ul>
                 {% for item in items %}
                 {% if item['type'] == 'soup' %}
-                <li>
+                <li class="item">
                     <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
                     {{ item['name'] }}: ${{ item['price'] }}
                 </li>
@@ -113,7 +135,7 @@
             <ul>
                 {% for item in items %}
                 {% if item['type'] == 'stir-fry' %}
-                <li>
+                <li class="item">
                     <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
                     {{ item['name'] }}: ${{ item['price'] }}
                 </li>
@@ -127,7 +149,7 @@
             <ul>
                 {% for item in items %}
                 {% if item['type'] == 'toppings' %}
-                <li>
+                <li class="item">
                     <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
                     {{ item['name'] }}: ${{ item['price'] }}
                 </li>
@@ -141,7 +163,7 @@
             <ul>
                 {% for item in items %}
                 {% if item['type'] == 'drinks' %}
-                <li>
+                <li class="item">
                     <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
                     {{ item['name'] }}: ${{ item['price'] }}
                 </li>

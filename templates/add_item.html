@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ action }} Item</title>
+    <title>Add/Edit Item</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 600px;
+            max-width: 800px;
             margin: auto;
-            padding: 15px;
+            padding: 20px;
             background-color: #f4f4f9;
         }
         h1 {
@@ -43,28 +43,67 @@
         button:hover {
             background-color: #31b0d5;
         }
+        .item-list {
+            margin-top: 20px;
+        }
+        .item-list h3 {
+            margin-bottom: 10px;
+        }
+        .item {
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+        .edit-button {
+            margin-left: 10px;
+            background-color: #f0ad4e;
+        }
+        .edit-button:hover {
+            background-color: #ec971f;
+        }
     </style>
 </head>
 <body>
-    <h1>{{ action }} Item</h1>
-    <form action="/{{ action|lower }}_item" method="POST">
-        <input type="hidden" name="item_id" value="{{ item.id if item else '' }}">
-        
+    <h1>Add/Edit Item</h1>
+    <form action="/add_item" method="POST">
         <label for="name">Item Name:</label>
-        <input type="text" id="name" name="name" value="{{ item.name if item else '' }}" required>
+        <input type="text" id="name" name="name" required>
         
         <label for="price">Price:</label>
-        <input type="number" step="0.01" id="price" name="price" value="{{ item.price if item else '' }}" required>
+        <input type="number" step="0.01" id="price" name="price" required>
 
         <label for="type">Type:</label>
         <select id="type" name="type" required>
-            <option value="soup" {% if item.type == 'soup' %}selected{% endif %}>Soup</option>
-            <option value="stir-fry" {% if item.type == 'stir-fry' %}selected{% endif %}>Stir-Fry</option>
-            <option value="toppings" {% if item.type == 'toppings' %}selected{% endif %}>Toppings</option>
-            <option value="drinks" {% if item.type == 'drinks' %}selected{% endif %}>Drinks</option>
+            <option value="soup">Soup</option>
+            <option value="stir-fry">Stir-Fry</option>
+            <option value="toppings">Toppings</option>
+            <option value="drinks">Drinks</option>
         </select>
         
-        <button type="submit">{{ action }}</button>
+        <button type="submit">Add Item</button>
     </form>
+
+    <div class="item-list">
+        <h3>Existing Items</h3>
+        <ul>
+            {% for item in items %}
+            <li class="item">
+                {{ item['name'] }} - ${{ item['price'] }} ({{ item['type'] }})
+                <button class="edit-button" onclick="editItem('{{ item['id'] }}', '{{ item['name'] }}', {{ item['price'] }}, '{{ item['type'] }}')">Edit</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <script>
+        function editItem(id, name, price, type) {
+            document.getElementById('name').value = name;
+            document.getElementById('price').value = price;
+            document.getElementById('type').value = type;
+
+            // Change the form action to update the item instead of adding
+            const form = document.querySelector('form');
+            form.action = `/edit_item/${id}`; // Update the form action for editing
+        }
+    </script>
 </body>
 </html>

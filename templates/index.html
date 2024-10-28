@@ -19,17 +19,6 @@
             color: #6a1b9a;
             margin-bottom: 10px;
         }
-        .search-container {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .search-container input {
-            padding: 8px;
-            width: 80%;
-            max-width: 400px;
-            border: 1px solid #d1c4e9;
-            border-radius: 4px;
-        }
         nav {
             display: flex;
             justify-content: center;
@@ -46,6 +35,19 @@
         nav a:hover {
             background-color: #7b1fa2;
         }
+        .search-container {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .search-container label {
+            font-weight: bold;
+        }
+        .search-container input[type="text"] {
+            padding: 8px;
+            margin-left: 10px;
+            border: 1px solid #d1c4e9;
+            border-radius: 4px;
+        }
         .item-type {
             margin-top: 20px;
             padding: 10px;
@@ -57,135 +59,40 @@
             font-size: 18px;
             margin-bottom: 5px;
         }
-        .item-entry {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            margin-bottom: 5px; /* Space between items */
-        }
-        .quantity-dropdown {
-            margin-left: 10px; /* Space between checkbox and dropdown */
-            padding: 5px;
-        }
-        button, input[type="number"] {
+        button {
             font-size: 16px;
             padding: 8px;
-        }
-        #total {
-            font-weight: bold;
-            margin-top: 10px;
-            font-size: 18px;
-        }
-        button {
             background-color: #8e24aa;
             color: white;
             border: none;
             cursor: pointer;
             border-radius: 5px;
-            padding: 10px 20px;
+            margin-top: 10px;
         }
         button:hover {
             background-color: #7b1fa2;
         }
+        #total, #change {
+            font-weight: bold;
+            margin-top: 10px;
+            font-size: 18px;
+        }
     </style>
-    <script>
-        function filterItems() {
-            const searchInput = document.getElementById('search').value.toLowerCase();
-            const items = document.querySelectorAll('.item-entry');
-
-            items.forEach(item => {
-                const itemName = item.querySelector('span').textContent.toLowerCase();
-                if (itemName.includes(searchInput)) {
-                    item.style.display = ''; // Show the item
-                } else {
-                    item.style.display = 'none'; // Hide the item
-                }
-            });
-        }
-
-        function updateCheckedItems() {
-            const checkboxes = document.querySelectorAll('input[name="item_id"]:checked');
-            const selectedItemsContainer = document.getElementById('selected-items');
-            selectedItemsContainer.innerHTML = ''; // Clear previous selections
-
-            checkboxes.forEach(checkbox => {
-                const itemName = checkbox.nextElementSibling.textContent; // Get item name
-                const price = checkbox.getAttribute('data-price');
-
-                // Create a new div for the selected item
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'item-entry';
-
-                // Create quantity dropdown
-                const quantityDropdown = document.createElement('select');
-                quantityDropdown.className = 'quantity-dropdown';
-                quantityDropdown.onchange = calculateTotal;
-
-                for (let i = 1; i <= 10; i++) {
-                    const option = document.createElement('option');
-                    option.value = i;
-                    option.text = i;
-                    quantityDropdown.appendChild(option);
-                }
-
-                // Create a span for the item name
-                itemDiv.innerHTML = `<span>${itemName}:</span> ₱${price}`;
-                itemDiv.appendChild(quantityDropdown);
-
-                // Add the itemDiv to the selected items container
-                selectedItemsContainer.appendChild(itemDiv);
-            });
-
-            // Calculate total after updating selected items
-            calculateTotal();
-        }
-
-        function calculateTotal() {
-            const selectedItemsContainer = document.getElementById('selected-items');
-            const itemEntries = selectedItemsContainer.getElementsByClassName('item-entry');
-            let total = 0;
-
-            Array.from(itemEntries).forEach(entry => {
-                const price = parseFloat(entry.querySelector('span').textContent.split('₱')[1]);
-                const quantity = parseInt(entry.querySelector('.quantity-dropdown').value);
-                total += price * quantity;
-            });
-
-            document.getElementById('total').textContent = 'Total: ₱' + total.toFixed(2);
-        }
-
-        function calculateChange() {
-            const moneyReceived = parseFloat(document.getElementById('money_received').value) || 0;
-            const total = parseFloat(document.getElementById('total').textContent.replace('Total: ₱', '')) || 0;
-            const change = moneyReceived - total;
-            document.getElementById('change').textContent = 'Change: ₱' + (change >= 0 ? change.toFixed(2) : 0);
-        }
-
-        function makeTransaction() {
-            const total = parseFloat(document.getElementById('total').textContent.replace('Total: ₱', '')) || 0;
-            const moneyReceived = parseFloat(document.getElementById('money_received').value) || 0;
-
-            if (moneyReceived < total) {
-                alert('Insufficient amount. Please enter a valid amount.');
-                return;
-            }
-
-            // Proceed with the transaction (you might want to submit the form here)
-            document.forms[0].submit(); // Submit the form
-        }
-    </script>
 </head>
 <body>
     <h1>H & S Ramyeon</h1>
-
-    <div class="search-container">
-        <input type="text" id="search" onkeyup="filterItems()" placeholder="Find an item...">
-    </div>
 
     <nav>
         <a href="/add_item">Add Item</a>
         <a href="/invoices">View Invoices</a>
     </nav>
+
+    <div class="search-container">
+        <label for="search">Find Item:</label>
+        <form method="POST" action="/">
+            <input type="text" id="search" name="search_query" onkeyup="this.form.submit()" placeholder="Search for items..." />
+        </form>
+    </div>
 
     <h2>Available Items</h2>
 
@@ -196,9 +103,9 @@
             <ul>
                 {% for item in items %}
                 {% if item['type'] == type %}
-                <li class="item-entry">
-                    <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="updateCheckedItems()">
-                    <span>{{ item['name'] }}: ₱{{ item['price'] }}</span>
+                <li>
+                    <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
+                    {{ item['name'] }}: ₱{{ item['price'] }}
                 </li>
                 {% endif %}
                 {% endfor %}
@@ -206,17 +113,32 @@
         </div>
         {% endfor %}
 
-        <h3>Selected Items</h3>
-        <div id="selected-items"></div> <!-- Container for selected items -->
-
         <div id="total">Total: ₱0.00</div>
 
         <label for="money_received">Money:</label>
-        <input type="number" step="0.01" id="money_received" name="money_received" oninput="calculateChange()" placeholder="Enter amount" required>
-        
+        <input type="number" step="0.01" id="money_received" name="money_received" oninput="calculateChange()">
         <div id="change">Change: ₱0.00</div>
 
-        <button type="button" onclick="makeTransaction()">Make Transaction</button>
+        <button type="submit">Make Transaction</button>
     </form>
+
+    <script>
+        function calculateTotal() {
+            const checkboxes = document.querySelectorAll('input[name="item_id"]:checked');
+            let total = 0;
+            checkboxes.forEach(checkbox => {
+                const price = parseFloat(checkbox.getAttribute('data-price'));
+                total += price;
+            });
+            document.getElementById('total').innerText = 'Total: ₱' + total.toFixed(2);
+        }
+
+        function calculateChange() {
+            const total = parseFloat(document.getElementById('total').innerText.replace('Total: ₱', '')) || 0;
+            const moneyReceived = parseFloat(document.getElementById('money_received').value) || 0;
+            const change = moneyReceived - total;
+            document.getElementById('change').innerText = 'Change: ₱' + change.toFixed(2);
+        }
+    </script>
 </body>
 </html>

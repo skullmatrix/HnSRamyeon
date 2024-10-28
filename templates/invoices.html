@@ -36,6 +36,8 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            background-color: #e1bee7;
+            border-radius: 8px;
         }
         th, td {
             border: 1px solid #ddd;
@@ -52,16 +54,15 @@
         tr:hover {
             background-color: #ddd;
         }
-        .delete-button {
-            background-color: #d9534f; /* Red background for delete button */
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
+        .filter-container {
+            margin-bottom: 20px;
         }
-        .delete-button:hover {
-            background-color: #c9302c; /* Darker red on hover */
+        .filter-container label {
+            font-weight: bold;
+        }
+        .filter-container input {
+            padding: 8px;
+            margin-left: 10px;
         }
     </style>
 </head>
@@ -69,10 +70,16 @@
     <h1>Invoices</h1>
     
     <div class="nav">
-        <a href="/">Back</a> <!-- Link to go back to the index page -->
+        <a href="/">Back</a>
+        <a href="/export_invoices" id="export-link">Export Invoices</a> <!-- Link to export invoices -->
     </div>
-    
-    <table>
+
+    <div class="filter-container">
+        <label for="filter-date">Filter by Date:</label>
+        <input type="date" id="filter-date" onchange="filterInvoices()">
+    </div>
+
+    <table id="invoices-table">
         <tr>
             <th>ID</th>
             <th>Date & Time</th>
@@ -80,7 +87,6 @@
             <th>Money Received</th>
             <th>Change</th>
             <th>Items Purchased</th>
-            <th>Action</th>
         </tr>
         {% for invoice in invoices %}
         <tr>
@@ -90,13 +96,25 @@
             <td>₱{{ invoice['money_received'] }}</td>
             <td>₱{{ invoice['change'] }}</td>
             <td>{{ invoice['items'] }}</td>
-            <td>
-                <form action="/delete_invoice/{{ invoice['id'] }}" method="POST" style="display:inline;">
-                    <button type="submit" class="delete-button">Delete</button>
-                </form>
-            </td>
         </tr>
         {% endfor %}
     </table>
+
+    <script>
+        function filterInvoices() {
+            const filterDate = document.getElementById('filter-date').value;
+            const table = document.getElementById('invoices-table');
+            const rows = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < rows.length; i++) {
+                const dateCell = rows[i].cells[1].innerText.split(' ')[0]; // Get only the date part
+                if (filterDate === '' || dateCell === filterDate) {
+                    rows[i].style.display = ''; // Show the row
+                } else {
+                    rows[i].style.display = 'none'; // Hide the row
+                }
+            }
+        }
+    </script>
 </body>
 </html>

@@ -62,10 +62,6 @@
         button:hover {
             background-color: #7b1fa2;
         }
-        .quantity-input {
-            width: 4ch;
-            text-align: center;
-        }
     </style>
     <script>
         function updateReview() {
@@ -77,17 +73,20 @@
                 const checkbox = row.querySelector('input[type="checkbox"]');
                 if (checkbox.checked) {
                     const price = parseFloat(checkbox.getAttribute('data-price'));
-                    const quantityInput = document.createElement('input');
-                    quantityInput.type = 'number';
-                    quantityInput.name = 'quantity';
-                    quantityInput.value = 1;
-                    quantityInput.min = 1;
-                    quantityInput.className = 'quantity-input';
-                    quantityInput.onchange = calculateTotal;
+                    const quantitySelect = document.createElement('select');
+                    quantitySelect.name = 'quantity';
+                    quantitySelect.onchange = calculateTotal;
+
+                    for (let i = 1; i <= 10; i++) { // Dropdown for quantities from 1 to 10
+                        const option = document.createElement('option');
+                        option.value = i;
+                        option.text = i;
+                        quantitySelect.appendChild(option);
+                    }
 
                     const quantityContainer = document.createElement('div');
                     quantityContainer.textContent = `${checkbox.dataset.name}: ₱${price} `;
-                    quantityContainer.appendChild(quantityInput);
+                    quantityContainer.appendChild(quantitySelect);
                     reviewSection.appendChild(quantityContainer);
                 }
             });
@@ -96,9 +95,9 @@
 
         function calculateTotal() {
             let total = 0;
-            document.querySelectorAll('#review-section input[type="number"]').forEach(input => {
-                const price = parseFloat(input.parentElement.textContent.split('₱')[1]);
-                total += price * (parseInt(input.value) || 1);
+            document.querySelectorAll('#review-section select').forEach(select => {
+                const price = parseFloat(select.parentElement.textContent.split('₱')[1]);
+                total += price * (parseInt(select.value) || 1);
             });
             document.getElementById('total').innerText = 'Total: ₱' + total.toFixed(2);
             calculateChange();
@@ -109,6 +108,14 @@
             const moneyReceived = parseFloat(document.getElementById('money_received').value) || 0;
             const change = Math.max(0, moneyReceived - total);
             document.getElementById('change').innerText = 'Change: ₱' + change.toFixed(2);
+        }
+
+        function validateForm(event) {
+            const moneyReceived = document.getElementById('money_received').value;
+            if (!moneyReceived || isNaN(moneyReceived) || Number(moneyReceived) <= 0) {
+                event.preventDefault(); // Prevent form submission
+                alert("Please enter a valid amount of money received.");
+            }
         }
     </script>
 </head>
@@ -122,7 +129,7 @@
 
     <h2>Available Items</h2>
 
-    <form action="/make_transaction" method="POST">
+    <form action="/make_transaction" method="POST" onsubmit="validateForm(event)">
         {% for type in ['Soup Base', 'Stir Fry', 'Cups', 'Toppings', 'Sweets', 'Drinks'] %}
         <div class="item-type">
             <h3>{{ type }}</h3>

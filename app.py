@@ -55,17 +55,34 @@ def index():
     return render_template('index.html', items=items)
 
 @app.route('/add_item', methods=['GET', 'POST'])
-def add_item():
+@app.route('/edit_item/<int:item_id>', methods=['GET', 'POST'])
+def add_item(item_id=None):
+    conn = get_db_connection()
+
     if request.method == 'POST':
-        name = request.form['name']
-        price = float(request.form['price'])
-        type = request.form['type']
-        conn = get_db_connection()
-        conn.execute('INSERT INTO items (name, price, type) VALUES (?, ?, ?)', (name, price, type))
-        conn.commit()
+        if item_id:  # Editing an existing item
+            name = request.form['name']
+            price = float(request.form['price'])
+            type = request.form['type']
+            conn.execute('UPDATE items SET name = ?, price = ?, type = ? WHERE id = ?', (name, price, type, item_id))
+            conn.commit()
+            return redirect(url_for('index'))  # Redirect back to the main page
+        else:  # Adding a new item
+            name = request.form['name']
+            price = float(request.form['price'])
+            type = request.form['type']
+            conn.execute('INSERT INTO items (name, price, type) VALUES (?, ?, ?)', (name, price, type))
+            conn.commit()
+            return redirect(url_for('index'))  # Redirect back to the main page
+
+    if item_id:  # Fetch the item details if we're editing
+        item = conn.execute('SELECT * FROM items WHERE id = ?', (item_id,)).fetchone()
         conn.close()
-        return redirect(url_for('index'))  # Redirect back to the main page
-    return render_template('add_item.html')  # Render the add item page
+        return render_template('add_item.html', action='Edit', item=item)
+
+    # If no item_id, render an empty form for adding a new item
+    conn.close()
+    return render_template('add_item.html', action='Add')
 
 @app.route('/make_transaction', methods=['POST'])
 def make_transaction():

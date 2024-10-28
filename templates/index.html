@@ -57,11 +57,21 @@
             font-size: 18px;
             margin-bottom: 5px;
         }
+        .item-entry {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 5px; /* Space between items */
+        }
+        .quantity-dropdown {
+            margin-left: 10px; /* Space between checkbox and dropdown */
+            padding: 5px;
+        }
         button, input[type="number"] {
             font-size: 16px;
             padding: 8px;
         }
-        #total, #change {
+        #total {
             font-weight: bold;
             margin-top: 10px;
             font-size: 18px;
@@ -76,16 +86,6 @@
         }
         button:hover {
             background-color: #7b1fa2;
-        }
-        .item-entry {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            margin-bottom: 5px; /* Space between items */
-        }
-        .quantity-dropdown {
-            margin-left: 10px; /* Space between checkbox and dropdown */
-            padding: 5px;
         }
     </style>
     <script>
@@ -103,13 +103,51 @@
             });
         }
 
-        function calculateTotal() {
+        function updateCheckedItems() {
             const checkboxes = document.querySelectorAll('input[name="item_id"]:checked');
-            let total = 0;
+            const selectedItemsContainer = document.getElementById('selected-items');
+            selectedItemsContainer.innerHTML = ''; // Clear previous selections
 
             checkboxes.forEach(checkbox => {
-                const price = parseFloat(checkbox.getAttribute('data-price'));
-                const quantity = parseInt(checkbox.closest('.item-entry').querySelector('.quantity-dropdown').value) || 1;
+                const itemName = checkbox.nextElementSibling.textContent; // Get item name
+                const price = checkbox.getAttribute('data-price');
+
+                // Create a new div for the selected item
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'item-entry';
+
+                // Create quantity dropdown
+                const quantityDropdown = document.createElement('select');
+                quantityDropdown.className = 'quantity-dropdown';
+                quantityDropdown.onchange = calculateTotal;
+
+                for (let i = 1; i <= 10; i++) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.text = i;
+                    quantityDropdown.appendChild(option);
+                }
+
+                // Create a span for the item name and price
+                itemDiv.innerHTML = `<span>${itemName}: ₱${price}</span>`;
+                itemDiv.appendChild(quantityDropdown);
+
+                // Add the itemDiv to the selected items container
+                selectedItemsContainer.appendChild(itemDiv);
+            });
+
+            // Calculate total after updating selected items
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            const selectedItemsContainer = document.getElementById('selected-items');
+            const itemEntries = selectedItemsContainer.getElementsByClassName('item-entry');
+            let total = 0;
+
+            Array.from(itemEntries).forEach(entry => {
+                const price = parseFloat(entry.querySelector('span').textContent.split('₱')[1]);
+                const quantity = parseInt(entry.querySelector('.quantity-dropdown').value);
                 total += price * quantity;
             });
 
@@ -156,7 +194,7 @@
                 {% for item in items %}
                 {% if item['type'] == type %}
                 <li class="item-entry">
-                    <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
+                    <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="updateCheckedItems()">
                     <span>{{ item['name'] }}: ₱{{ item['price'] }}</span>
                 </li>
                 {% endif %}
@@ -164,6 +202,9 @@
             </ul>
         </div>
         {% endfor %}
+
+        <h3>Selected Items</h3>
+        <div id="selected-items"></div> <!-- Container for selected items -->
 
         <div id="total">Total: ₱0.00</div>
 

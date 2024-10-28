@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoices - H&S Ramyeon</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: auto;
+            padding: 15px;
+            background-color: #f4f4f9;
+        }
+        h1 {
+            text-align: center;
+            color: #d9534f;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <h1>Invoices</h1>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Transaction ID</th>
+                <th>Item Name</th>
+                <th>Item Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for invoice in invoices %}
+            <tr>
+                <td>{{ invoice.transaction_id }}</td>
+                <td>{{ invoice.item_name }}</td>
+                <td>${{ invoice.item_price }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <a href="/">Back to Home</a>
+</body>
+</html>

@@ -60,12 +60,31 @@ def add_item():
         name = request.form['name']
         price = float(request.form['price'])
         type = request.form['type']
+        item_id = request.form.get('item_id')  # Get the item ID if it exists
+        
         conn = get_db_connection()
-        conn.execute('INSERT INTO items (name, price, type) VALUES (?, ?, ?)', (name, price, type))
+        if item_id:  # If editing an existing item
+            conn.execute('UPDATE items SET name = ?, price = ?, type = ? WHERE id = ?', (name, price, type, item_id))
+        else:  # If adding a new item
+            conn.execute('INSERT INTO items (name, price, type) VALUES (?, ?, ?)', (name, price, type))
+        
         conn.commit()
         conn.close()
         return redirect(url_for('index'))  # Redirect back to the main page
-    return render_template('add_item.html')  # Render the add item page
+    else:
+        conn = get_db_connection()
+        items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()  # Fetch existing items for display
+        conn.close()
+        return render_template('add_item.html', items=items)  # Render the add/edit item page
+
+@app.route('/edit_item/<int:item_id>', methods=['GET'])
+def edit_item(item_id):
+    conn = get_db_connection()
+    item = conn.execute('SELECT * FROM items WHERE id = ?', (item_id,)).fetchone()
+    conn.close()
+    if item:
+        return render_template('add_item.html', item=item)  # Populate the form with item data
+    return redirect(url_for('index'))
 
 @app.route('/make_transaction', methods=['POST'])
 def make_transaction():

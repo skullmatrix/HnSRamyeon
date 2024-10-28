@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             max-width: 800px;
             margin: auto;
             padding: 20px;
@@ -29,9 +29,6 @@
             color: #5bc0de;
             font-weight: bold;
         }
-        nav a:hover {
-            text-decoration: underline;
-        }
         .item-type {
             margin-top: 20px;
             padding: 10px;
@@ -48,12 +45,8 @@
             margin-top: 10px;
             font-size: 18px;
         }
-        label {
-            font-weight: bold;
-            margin-right: 5px;
-        }
-        input[type="number"], input[type="text"], select {
-            width: calc(100% - 120px);
+        input[type="number"] {
+            width: calc(100% - 100px);
             padding: 8px;
             margin-bottom: 10px;
             border: 1px solid #ccc;
@@ -68,42 +61,7 @@
             cursor: pointer;
             font-size: 16px;
         }
-        button:hover {
-            background-color: #31b0d5;
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        .item {
-            padding: 5px 0;
-        }
-        .item input[type="checkbox"] {
-            margin-right: 10px;
-        }
     </style>
-    <script>
-        function calculateTotal() {
-            const itemCheckboxes = document.querySelectorAll('input[name="item_id"]:checked');
-            let total = 0;
-
-            itemCheckboxes.forEach((checkbox) => {
-                const price = parseFloat(checkbox.getAttribute('data-price'));
-                total += price;
-            });
-
-            document.getElementById('total').textContent = 'Total: $' + total.toFixed(2);
-            calculateChange(); // Update change whenever total changes
-        }
-
-        function calculateChange() {
-            const total = parseFloat(document.getElementById('total').textContent.replace('Total: $', '')) || 0;
-            const moneyReceived = parseFloat(document.getElementById('money_received').value) || 0;
-            const change = moneyReceived - total;
-
-            document.getElementById('change').textContent = 'Change: $' + (change >= 0 ? change.toFixed(2) : '0.00');
-        }
-    </script>
 </head>
 <body>
     <h1>H&S Ramyeon</h1>
@@ -116,12 +74,13 @@
     <h2>Available Items</h2>
     
     <form action="/make_transaction" method="POST">
-        <div id="soup" class="item-type">
-            <h3>Soups</h3>
+        {% for type in ['Soup Base', 'Stir Fry', 'Cups', 'Toppings', 'Sweets', 'Drinks'] %}
+        <div class="item-type">
+            <h3>{{ type }}</h3>
             <ul>
                 {% for item in items %}
-                {% if item['type'] == 'soup' %}
-                <li class="item">
+                {% if item['type'] == type %}
+                <li>
                     <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
                     {{ item['name'] }}: ${{ item['price'] }}
                 </li>
@@ -129,48 +88,7 @@
                 {% endfor %}
             </ul>
         </div>
-
-        <div id="stir-fry" class="item-type">
-            <h3>Stir-Fry</h3>
-            <ul>
-                {% for item in items %}
-                {% if item['type'] == 'stir-fry' %}
-                <li class="item">
-                    <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
-                    {{ item['name'] }}: ${{ item['price'] }}
-                </li>
-                {% endif %}
-                {% endfor %}
-            </ul>
-        </div>
-
-        <div id="toppings" class="item-type">
-            <h3>Toppings</h3>
-            <ul>
-                {% for item in items %}
-                {% if item['type'] == 'toppings' %}
-                <li class="item">
-                    <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
-                    {{ item['name'] }}: ${{ item['price'] }}
-                </li>
-                {% endif %}
-                {% endfor %}
-            </ul>
-        </div>
-
-        <div id="drinks" class="item-type">
-            <h3>Drinks</h3>
-            <ul>
-                {% for item in items %}
-                {% if item['type'] == 'drinks' %}
-                <li class="item">
-                    <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
-                    {{ item['name'] }}: ${{ item['price'] }}
-                </li>
-                {% endif %}
-                {% endfor %}
-            </ul>
-        </div>
+        {% endfor %}
         
         <div id="total">Total: $0.00</div>
         

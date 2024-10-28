@@ -54,23 +54,40 @@
             cursor: pointer;
             width: auto; /* Set width to auto for the button */
         }
+        .search-container {
+            margin-top: 20px;
+        }
         .item-list {
             margin-top: 20px;
         }
         .item-entry {
             border-bottom: 1px solid #d1c4e9;
-            padding: 10px 0; /* Reduced padding for item entries */
+            padding: 5px 0; /* Reduced padding for item entries */
         }
         .edit-button {
-            color: #white; /* Text color */
+            color: #8e24aa; /* Text color */
             background: #8e24aa; /* No background color */
             border: none; /* No border */
             font-size: 14px;
             cursor: pointer;
-            margin-top: 5px; /* Space above the button */
             width: fit-content; /* Fit the button to the text */
         }
     </style>
+    <script>
+        function filterItems() {
+            const searchInput = document.getElementById('search').value.toLowerCase();
+            const items = document.querySelectorAll('.item-entry');
+
+            items.forEach(item => {
+                const itemName = item.querySelector('span').textContent.toLowerCase();
+                if (itemName.includes(searchInput)) {
+                    item.style.display = ''; // Show the item
+                } else {
+                    item.style.display = 'none'; // Hide the item
+                }
+            });
+        }
+    </script>
 </head>
 <body>
     <a href="/" class="back-button">Back</a>
@@ -97,6 +114,11 @@
         
         <button type="submit">{{ 'Update Item' if item else 'Add Item' }}</button>
     </form>
+
+    <div class="search-container">
+        <label for="search">Find Item:</label>
+        <input type="text" id="search" onkeyup="filterItems()" placeholder="Search for items..." />
+    </div>
 
     <div class="item-list">
         <h3>Existing Items</h3>

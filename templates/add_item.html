@@ -54,22 +54,6 @@
             cursor: pointer;
             width: 100%;
         }
-        button:hover {
-            background-color: #7b1fa2;
-        }
-        .item-list {
-            margin-top: 20px;
-        }
-        .item-list h3 {
-            color: #6a1b9a;
-        }
-        .item-entry {
-            display: flex;
-            justify-content: space-between;
-            padding: 5px 0;
-            border-bottom: 1px solid #d1c4e9;
-            align-items: center;
-        }
         .edit-button {
             background-color: #8e24aa;
             color: white;
@@ -78,19 +62,15 @@
             font-size: 14px;
             cursor: pointer;
         }
-        .edit-button:hover {
-            background-color: #7b1fa2;
-        }
     </style>
 </head>
 <body>
     <a href="/" class="back-button">Back</a>
     <h1>Edit Items</h1>
 
-    <!-- Form for adding/updating items -->
     <form action="/add_item" method="POST">
         <input type="hidden" name="item_id" value="{{ item['id'] if item else '' }}">
-
+        
         <label for="name">Item Name:</label>
         <input type="text" id="name" name="name" value="{{ item['name'] if item else '' }}" required>
 
@@ -106,11 +86,10 @@
             <option value="Sweets" {% if item and item['type'] == 'Sweets' %}selected{% endif %}>Sweets</option>
             <option value="Drinks" {% if item and item['type'] == 'Drinks' %}selected{% endif %}>Drinks</option>
         </select>
-
+        
         <button type="submit">{{ 'Update Item' if item else 'Add Item' }}</button>
     </form>
 
-    <!-- List of items with Edit buttons -->
     <div class="item-list">
         <h3>Existing Items</h3>
         {% for item in items %}

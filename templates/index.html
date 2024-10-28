@@ -31,10 +31,6 @@
             background-color: #e9ecef;
             border-radius: 5px;
         }
-        .item-type h3 {
-            font-size: 18px; /* Smaller font size for types */
-            margin: 0;
-        }
         #total, #change {
             font-weight: bold;
             margin-top: 5px;
@@ -102,7 +98,6 @@
                 <li>
                     <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
                     {{ item['name'] }}: ${{ item['price'] }}
-                    <a href="/edit_item/{{ item['id'] }}">Edit</a>  <!-- Edit link -->
                 </li>
                 {% endif %}
                 {% endfor %}
@@ -117,7 +112,6 @@
                 <li>
                     <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
                     {{ item['name'] }}: ${{ item['price'] }}
-                    <a href="/edit_item/{{ item['id'] }}">Edit</a>  <!-- Edit link -->
                 </li>
                 {% endif %}
                 {% endfor %}
@@ -132,7 +126,6 @@
                 <li>
                     <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
                     {{ item['name'] }}: ${{ item['price'] }}
-                    <a href="/edit_item/{{ item['id'] }}">Edit</a>  <!-- Edit link -->
                 </li>
                 {% endif %}
                 {% endfor %}
@@ -147,7 +140,6 @@
                 <li>
                     <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
                     {{ item['name'] }}: ${{ item['price'] }}
-                    <a href="/edit_item/{{ item['id'] }}">Edit</a>  <!-- Edit link -->
                 </li>
                 {% endif %}
                 {% endfor %}

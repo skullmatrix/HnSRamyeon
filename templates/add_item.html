@@ -52,17 +52,14 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            width: 100%; /* Set width to auto for the button */
+            width: auto; /* Set width to auto for the button */
         }
         .item-list {
             margin-top: 20px;
         }
         .item-entry {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             border-bottom: 1px solid #d1c4e9;
-            padding: 5px 0; /* Reduce padding for item entries */
+            padding: 10px 0; /* Reduced padding for item entries */
         }
         .edit-button {
             padding: 5px 10px; /* Smaller padding */
@@ -71,8 +68,9 @@
             border: none; /* No border */
             font-size: 14px;
             cursor: pointer;
-            margin-left: 10px; /* Space between item name and button */
-            width: auto; /* Width set to auto */
+            margin-top: 5px; /* Space above the button */
+            display: block; /* Ensure the button takes full width */
+            width: fit-content; /* Fit the button to the text */
         }
     </style>
 </head>

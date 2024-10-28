@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, jsonify, render_template, redirect, url_for
 import sqlite3
 
@@ -87,6 +88,7 @@ def make_transaction():
     conn.close()
     return render_template('transaction.html', total=total)
 
-# Start the Flask application
+# Start the Flask application with the port provided by Render
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)

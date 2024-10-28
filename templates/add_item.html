@@ -65,21 +65,22 @@
 <body>
     <h1>Add/Edit Item</h1>
     <form action="/add_item" method="POST">
+        <input type="hidden" name="item_id" value="{{ item['id'] if item else '' }}"> <!-- Hidden input for item ID -->
         <label for="name">Item Name:</label>
-        <input type="text" id="name" name="name" required>
+        <input type="text" id="name" name="name" value="{{ item['name'] if item else '' }}" required>
         
         <label for="price">Price:</label>
-        <input type="number" step="0.01" id="price" name="price" required>
+        <input type="number" step="0.01" id="price" name="price" value="{{ item['price'] if item else '' }}" required>
 
         <label for="type">Type:</label>
         <select id="type" name="type" required>
-            <option value="soup">Soup</option>
-            <option value="stir-fry">Stir-Fry</option>
-            <option value="toppings">Toppings</option>
-            <option value="drinks">Drinks</option>
+            <option value="soup" {% if item and item['type'] == 'soup' %}selected{% endif %}>Soup</option>
+            <option value="stir-fry" {% if item and item['type'] == 'stir-fry' %}selected{% endif %}>Stir-Fry</option>
+            <option value="toppings" {% if item and item['type'] == 'toppings' %}selected{% endif %}>Toppings</option>
+            <option value="drinks" {% if item and item['type'] == 'drinks' %}selected{% endif %}>Drinks</option>
         </select>
         
-        <button type="submit">Add Item</button>
+        <button type="submit">Save Item</button>
     </form>
 
     <div class="item-list">
@@ -88,22 +89,6 @@
             {% for item in items %}
             <li class="item">
                 {{ item['name'] }} - ${{ item['price'] }} ({{ item['type'] }})
-                <button class="edit-button" onclick="editItem('{{ item['id'] }}', '{{ item['name'] }}', {{ item['price'] }}, '{{ item['type'] }}')">Edit</button>
+                <a class="edit-button" href="/edit_item/{{ item['id'] }}">Edit</a>
             </li>
             {% endfor %}
-        </ul>
-    </div>
-
-    <script>
-        function editItem(id, name, price, type) {
-            document.getElementById('name').value = name;
-            document.getElementById('price').value = price;
-            document.getElementById('type').value = type;
-
-            // Change the form action to update the item instead of adding
-            const form = document.querySelector('form');
-            form.action = `/edit_item/${id}`; // Update the form action for editing
-        }
-    </script>
-</body>
-</html>

@@ -60,9 +60,6 @@
             border-radius: 8px;
             margin-top: 20px;
         }
-        #review-section h3 {
-            color: #4a148c;
-        }
         button, input[type="number"] {
             font-size: 16px;
             padding: 8px;
@@ -83,11 +80,15 @@
         button:hover {
             background-color: #7b1fa2;
         }
+        .quantity-input {
+            width: 4ch;
+            text-align: center;
+        }
     </style>
     <script>
         function updateReview() {
             const reviewSection = document.getElementById('review-section');
-            reviewSection.innerHTML = '<h3>Review Items</h3>';
+            reviewSection.innerHTML = '';
             let total = 0;
 
             document.querySelectorAll('.item-row').forEach(row => {
@@ -99,10 +100,11 @@
                     quantityInput.name = 'quantity';
                     quantityInput.value = 1;
                     quantityInput.min = 1;
+                    quantityInput.className = 'quantity-input';
                     quantityInput.onchange = calculateTotal;
 
                     const quantityContainer = document.createElement('div');
-                    quantityContainer.textContent = `${checkbox.dataset.name}: ₱${price}`;
+                    quantityContainer.textContent = `${checkbox.dataset.name}: ₱${price} `;
                     quantityContainer.appendChild(quantityInput);
                     reviewSection.appendChild(quantityContainer);
                 }
@@ -159,8 +161,7 @@
         {% endfor %}
 
         <div id="review-section">
-            <h3>Review Items</h3>
-            <!-- Selected items will appear here with quantity inputs -->
+            <!-- Selected items with quantities will appear here -->
         </div>
 
         <div id="total">Total: ₱0.00</div>

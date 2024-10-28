@@ -1,10 +1,49 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Item</title>
+    <title>Add New Item</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+        h1 {
+            color: #d9534f;
+        }
+        form {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        label {
+            display: inline-block;
+            width: 100px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="number"], select {
+            width: calc(100% - 120px);
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #5bc0de;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #31b0d5;
+        }
+    </style>
 </head>
 <body>
     <h1>Add New Item</h1>
@@ -14,9 +53,16 @@
         
         <label for="price">Price:</label>
         <input type="number" step="0.01" id="price" name="price" required>
+
+        <label for="type">Type:</label>
+        <select id="type" name="type" required>
+            <option value="soup">Soup</option>
+            <option value="stir-fry">Stir-Fry</option>
+            <option value="toppings">Toppings</option>
+            <option value="drinks">Drinks</option>
+        </select>
         
         <button type="submit">Add Item</button>
     </form>
-    <a href="/">Back to Item List</a>
 </body>
 </html>

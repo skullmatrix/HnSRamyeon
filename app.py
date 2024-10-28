@@ -19,25 +19,25 @@ def initialize_database():
     CREATE TABLE IF NOT EXISTS items (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        price REAL NOT NULL,
+        price INTEGER NOT NULL,
         type TEXT NOT NULL
     );
     ''')
     conn.execute('''
     CREATE TABLE IF NOT EXISTS transactions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        total REAL NOT NULL,
-        money_received REAL NOT NULL,
-        change REAL NOT NULL,
+        total INTEGER NOT NULL,
+        money_received INTEGER NOT NULL,
+        change INTEGER NOT NULL,
         time TEXT NOT NULL
     );
     ''')
     conn.execute('''
     CREATE TABLE IF NOT EXISTS invoices (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        total REAL NOT NULL,
-        money_received REAL NOT NULL,
-        change REAL NOT NULL,
+        total INTEGER NOT NULL,
+        money_received INTEGER NOT NULL,
+        change INTEGER NOT NULL,
         time TEXT NOT NULL,
         items TEXT NOT NULL
     );
@@ -49,24 +49,20 @@ def initialize_database():
     cursor.execute("SELECT COUNT(*) FROM items")
     if cursor.fetchone()[0] == 0:
         items = [
-            # Soup Base
             ("Cheese Ramen Spicy", 99, "Soup Base"),
             ("Nongshim", 89, "Soup Base"),
             ("Ottogi Cheese Ramen", 91, "Soup Base"),
             ("Nongshim JJWANG", 129, "Soup Base"),
             ("SOON Ramen", 99, "Soup Base"),
             ("JIN Ramen", 89, "Soup Base"),
-            # Stir Fry
             ("Buldak Carbonara", 129, "Stir Fry"),
             ("Buldak Black", 129, "Stir Fry"),
             ("Buldak 2X Spicy", 129, "Stir Fry"),
             ("Cheese Ramen Stir Fry", 129, "Stir Fry"),
-            # Cups
             ("JIN Ramen Cup", 63, "Cups"),
             ("Shrimp Cup Ramen Small", 52, "Cups"),
             ("Nongshim Squid Jampong Cup", 59, "Cups"),
             ("Paldo Pororo Cup", 59, "Cups"),
-            # Toppings
             ("Raw Egg", 15, "Toppings"),
             ("Boiled Egg", 19, "Toppings"),
             ("Sliced Cheese", 15, "Toppings"),
@@ -84,11 +80,9 @@ def initialize_database():
             ("Ssamjang", 68, "Toppings"),
             ("Sanjo Doenjang", 68, "Toppings"),
             ("Lotte Luncheon Meat", 119, "Toppings"),
-            # Sweets
             ("Ice Cream Cone", 11, "Sweets"),
             ("Pepero", 59, "Sweets"),
             ("Almond Choco Ball", 69, "Sweets"),
-            # Drinks
             ("Ice Talk", 59, "Drinks"),
             ("Welch’s", 70, "Drinks"),
             ("Jinro Soju", 110, "Drinks"),
@@ -110,8 +104,6 @@ initialize_database()
 @app.route('/', methods=['GET', 'POST'])
 def index():
     conn = get_db_connection()
-    
-    # Fetch all items from the database, sorted by type
     items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
     conn.close()
     return render_template('index.html', items=items)
@@ -122,7 +114,7 @@ def add_item():
     
     if request.method == 'POST':
         name = request.form['name']
-        price = float(request.form['price'])
+        price = int(request.form['price'])
         type = request.form['type']
         item_id = request.form.get('item_id')  # Get the item ID if it exists
         
@@ -133,12 +125,12 @@ def add_item():
         
         conn.commit()
         conn.close()
-        return redirect(url_for('index'))  # Redirect back to the main page
+        return redirect(url_for('index'))
     
     # Fetch existing items for display on the Add Item page
     items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
     conn.close()
-    return render_template('add_item.html', items=items)  # Render the add/edit item page
+    return render_template('add_item.html', items=items)
 
 @app.route('/edit_item/<int:item_id>', methods=['GET'])
 def edit_item(item_id):
@@ -146,41 +138,36 @@ def edit_item(item_id):
     item = conn.execute('SELECT * FROM items WHERE id = ?', (item_id,)).fetchone()
     conn.close()
     if item:
-        return render_template('add_item.html', item=item)  # Populate the form with item data
+        return render_template('add_item.html', item=item)
     return redirect(url_for('index'))
 
 @app.route('/make_transaction', methods=['POST'])
 def make_transaction():
     item_ids = request.form.getlist('item_id')
-    money_received = float(request.form['money_received'])
+    quantities = request.form.getlist('quantity')
+    money_received = int(request.form['money_received'])
     conn = get_db_connection()
     total = 0
     items_purchased = []
 
-    for item_id in item_ids:
+    for i, item_id in enumerate(item_ids):
         item = conn.execute('SELECT * FROM items WHERE id = ?', (item_id,)).fetchone()
-        total += item['price']
-        items_purchased.append((item['name'], item['price']))
+        quantity = int(quantities[i])
+        item_total = item['price'] * quantity
+        total += item_total
+        items_purchased.append((item['name'], item['price'], quantity, item_total))
 
     change = max(0, money_received - total)
 
-    # Get the current time in the Philippines timezone
     philippine_tz = pytz.timezone('Asia/Manila')
     purchase_time = datetime.now(philippine_tz).strftime('%Y-%m-%d %H:%M:%S')
 
-    # Insert transaction into the database
-    conn.execute('INSERT INTO transactions (total, money_received, change, time) VALUES (?, ?, ?, ?)',
-                 (total, money_received, change, purchase_time))
-    
-    # Save invoice details into the invoices table
-    items_details = ', '.join([f"{item[0]} (${item[1]})" for item in items_purchased])
+    items_details = ', '.join([f"{name} (x{quantity}) ₱{item_total}" for name, price, quantity, item_total in items_purchased])
     conn.execute('INSERT INTO invoices (total, money_received, change, time, items) VALUES (?, ?, ?, ?, ?)',
                  (total, money_received, change, purchase_time, items_details))
 
     conn.commit()
     conn.close()
-
-    # Redirect back to the index page after making the transaction
     return redirect(url_for('index'))
 
 @app.route('/invoices', methods=['GET'])

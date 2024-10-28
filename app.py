@@ -1,6 +1,7 @@
 import os
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for, send_file
 import sqlite3
+import pandas as pd
 from datetime import datetime
 
 app = Flask(__name__)
@@ -12,7 +13,6 @@ def get_db_connection():
     return conn
 
 def initialize_database():
-    # Create required tables if they don't exist
     conn = get_db_connection()
     conn.execute('''
     CREATE TABLE IF NOT EXISTS items (
@@ -31,10 +31,18 @@ def initialize_database():
         time TEXT NOT NULL
     );
     ''')
+    conn.execute('''
+    CREATE TABLE IF NOT EXISTS invoices (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        transaction_id INTEGER,
+        item_name TEXT,
+        item_price REAL,
+        FOREIGN KEY(transaction_id) REFERENCES transactions(id)
+    );
+    ''')
     conn.commit()
     conn.close()
 
-# Initialize the database
 initialize_database()
 
 @app.route('/', methods=['GET', 'POST'])
@@ -49,13 +57,7 @@ def index():
         conn.execute('INSERT INTO items (name, price, type) VALUES (?, ?, ?)', (name, price, type))
         conn.commit()
 
-    # Fetch the updated list of items, sorted by type
-    try:
-        items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
-    except Exception as e:
-        print(f"Database query error: {e}")
-        items = []
-
+    items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
     conn.close()
     return render_template('index.html', items=items)
 
@@ -85,7 +87,6 @@ def add_item(item_id=None):
         conn.close()
         return render_template('add_item.html', action='Edit', item=item)
 
-    # If no item_id, render an empty form for adding a new item
     conn.close()
     return render_template('add_item.html', action='Add')
 
@@ -105,17 +106,30 @@ def make_transaction():
     change = max(0, money_received - total)
     purchase_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
+    # Insert transaction details
     conn.execute('INSERT INTO transactions (total, money_received, change, time) VALUES (?, ?, ?, ?)',
                  (total, money_received, change, purchase_time))
     transaction_id = conn.execute('SELECT last_insert_rowid()').fetchone()[0]
 
+    # Insert into invoices table
     for item in items_purchased:
-        conn.execute('INSERT INTO transaction_items (transaction_id, item_id, item_name, item_price) VALUES (?, ?, ?, ?)',
-                     (transaction_id, item[0], item[1], item[2]))
+        conn.execute('INSERT INTO invoices (transaction_id, item_name, item_price) VALUES (?, ?, ?)',
+                     (transaction_id, item[1], item[2]))
 
     conn.commit()
+
+    # Create Excel file for the transaction
+    df = pd.DataFrame(items_purchased, columns=['Item ID', 'Item Name', 'Item Price'])
+    df['Total'] = total
+    df['Money Received'] = money_received
+    df['Change'] = change
+    excel_file = f'transaction_{transaction_id}.xlsx'
+    df.to_excel(excel_file, index=False)
+
     conn.close()
-    return render_template('transaction.html', total=total, change=change, purchase_time=purchase_time, items=items_purchased)
+
+    # Return the Excel file for download
+    return send_file(excel_file, as_attachment=True)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

@@ -17,6 +17,21 @@
             text-align: center;
             color: #d9534f;
         }
+        .nav {
+            text-align: right; /* Align the button to the right */
+            margin-bottom: 20px;
+        }
+        .nav a {
+            padding: 10px 15px;
+            background-color: #5bc0de;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .nav a:hover {
+            background-color: #31b0d5;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -41,6 +56,11 @@
 </head>
 <body>
     <h1>Invoices</h1>
+    
+    <div class="nav">
+        <a href="/">Back</a> <!-- Link to go back to the index page -->
+    </div>
+    
     <table>
         <tr>
             <th>ID</th>

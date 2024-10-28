@@ -57,6 +57,12 @@
             font-size: 18px;
             margin-bottom: 5px;
         }
+        .item-entry {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 5px; /* Space between items */
+        }
         button, input[type="number"] {
             font-size: 16px;
             padding: 8px;
@@ -76,12 +82,6 @@
         }
         button:hover {
             background-color: #7b1fa2;
-        }
-        .item-entry {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 5px; /* Space between items */
         }
         .quantity-dropdown {
             margin-left: 10px; /* Space between checkbox and dropdown */
@@ -109,7 +109,7 @@
 
             checkboxes.forEach(checkbox => {
                 const price = parseFloat(checkbox.getAttribute('data-price'));
-                const quantity = parseInt(checkbox.closest('.item-entry').querySelector('.quantity-dropdown').value);
+                const quantity = parseInt(checkbox.closest('.item-entry').querySelector('.quantity-dropdown').value) || 1;
                 total += price * quantity;
             });
 
@@ -148,17 +148,20 @@
                 <li class="item-entry">
                     <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
                     <span>{{ item['name'] }}: ₱{{ item['price'] }}</span>
-                    <select class="quantity-dropdown" onchange="calculateTotal()">
-                        {% for i in range(1, 11) %} <!-- Quantity from 1 to 10 -->
-                        <option value="{{ i }}">{{ i }}</option>
-                        {% endfor %}
-                    </select>
                 </li>
                 {% endif %}
                 {% endfor %}
             </ul>
         </div>
         {% endfor %}
+
+        <h3>Review Transaction</h3>
+        <label for="quantity">Select Quantity:</label>
+        <select class="quantity-dropdown" name="quantity" onchange="calculateTotal()">
+            {% for i in range(1, 11) %} <!-- Quantity from 1 to 10 -->
+            <option value="{{ i }}">{{ i }}</option>
+            {% endfor %}
+        </select>
 
         <div id="total">Total: ₱0.00</div>
 

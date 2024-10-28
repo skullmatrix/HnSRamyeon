@@ -24,7 +24,39 @@
             text-decoration: none;
             color: #5bc0de;
         }
+        .item-type {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+        #total, #change {
+            font-weight: bold;
+            margin-top: 10px;
+        }
     </style>
+    <script>
+        function calculateTotal() {
+            const itemCheckboxes = document.querySelectorAll('input[name="item_id"]:checked');
+            let total = 0;
+
+            itemCheckboxes.forEach((checkbox) => {
+                const price = parseFloat(checkbox.getAttribute('data-price'));
+                total += price;
+            });
+
+            document.getElementById('total').textContent = 'Total: $' + total.toFixed(2);
+            calculateChange(); // Update change whenever total changes
+        }
+
+        function calculateChange() {
+            const total = parseFloat(document.getElementById('total').textContent.replace('Total: $', '')) || 0;
+            const moneyReceived = parseFloat(document.getElementById('money_received').value) || 0;
+            const change = moneyReceived - total;
+
+            document.getElementById('change').textContent = 'Change: $' + (change >= 0 ? change.toFixed(2) : '0.00');
+        }
+    </script>
 </head>
 <body>
     <h1>H&S Ramyeon</h1>
@@ -35,15 +67,64 @@
     </nav>
 
     <h2>Available Items</h2>
+    
     <form action="/make_transaction" method="POST">
-        <ul>
-            {% for item in items %}
-            <li>
-                <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
-                {{ item['type'] }} - {{ item['name'] }}: ${{ item['price'] }}
-            </li>
-            {% endfor %}
-        </ul>
+        <div id="soup" class="item-type">
+            <h3>Soups</h3>
+            <ul>
+                {% for item in items %}
+                {% if item['type'] == 'soup' %}
+                <li>
+                    <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
+                    {{ item['name'] }}: ${{ item['price'] }}
+                </li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div id="stir-fry" class="item-type">
+            <h3>Stir-Fry</h3>
+            <ul>
+                {% for item in items %}
+                {% if item['type'] == 'stir-fry' %}
+                <li>
+                    <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
+                    {{ item['name'] }}: ${{ item['price'] }}
+                </li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div id="toppings" class="item-type">
+            <h3>Toppings</h3>
+            <ul>
+                {% for item in items %}
+                {% if item['type'] == 'toppings' %}
+                <li>
+                    <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
+                    {{ item['name'] }}: ${{ item['price'] }}
+                </li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div id="drinks" class="item-type">
+            <h3>Drinks</h3>
+            <ul>
+                {% for item in items %}
+                {% if item['type'] == 'drinks' %}
+                <li>
+                    <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
+                    {{ item['name'] }}: ${{ item['price'] }}
+                </li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        
         <div id="total">Total: $0.00</div>
         
         <label for="money_received">Money Received:</label>

@@ -75,10 +75,33 @@
             background-color: #7b1fa2;
         }
     </style>
+    <script>
+        function calculateTotal() {
+            let total = 0;
+            document.querySelectorAll('.item-row').forEach(row => {
+                const checkbox = row.querySelector('input[type="checkbox"]');
+                const quantityInput = row.querySelector('input[type="number"]');
+                if (checkbox.checked) {
+                    const price = parseFloat(checkbox.getAttribute('data-price'));
+                    const quantity = parseInt(quantityInput.value) || 1;
+                    total += price * quantity;
+                }
+            });
+            document.getElementById('total').innerText = 'Total: ₱' + total.toFixed(2);
+            calculateChange();
+        }
+
+        function calculateChange() {
+            const total = parseFloat(document.getElementById('total').innerText.replace('Total: ₱', '')) || 0;
+            const moneyReceived = parseFloat(document.getElementById('money_received').value) || 0;
+            const change = Math.max(0, moneyReceived - total);
+            document.getElementById('change').innerText = 'Change: ₱' + change.toFixed(2);
+        }
+    </script>
 </head>
 <body>
     <div class="logo">
-        <img src="/static/logo.jpg" alt="H & S Ramyeon Logo">
+        <a href="https://pin.it/aoySh00WA"><img src="/static/logo.jpg" alt="H & S Ramyeon Logo"></a>
     </div>
     <h1>H & S Ramyeon</h1>
 
@@ -89,16 +112,17 @@
 
     <h2>Available Items</h2>
 
-    <form action="/make_transaction" method="POST">
+    <form action="/make_transaction" method="POST" onsubmit="return calculateTotal()">
         {% for type in ['Soup Base', 'Stir Fry', 'Cups', 'Toppings', 'Sweets', 'Drinks'] %}
         <div class="item-type">
             <h3>{{ type }}</h3>
             <ul>
                 {% for item in items %}
                 {% if item['type'] == type %}
-                <li>
+                <li class="item-row">
                     <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
-                    {{ item['name'] }}: ${{ item['price'] }}
+                    {{ item['name'] }}: ₱{{ item['price'] }}
+                    <input type="number" name="quantity" value="1" min="1" onchange="calculateTotal()">
                 </li>
                 {% endif %}
                 {% endfor %}
@@ -106,11 +130,11 @@
         </div>
         {% endfor %}
 
-        <div id="total">Total: $0.00</div>
+        <div id="total">Total: ₱0.00</div>
 
         <label for="money_received">Money:</label>
         <input type="number" step="0.01" id="money_received" name="money_received" oninput="calculateChange()">
-        <div id="change">Change: $0.00</div>
+        <div id="change">Change: ₱0.00</div>
 
         <button type="submit">Make Transaction</button>
     </form>

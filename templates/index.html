@@ -1,12 +1,58 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Item Management</title>
+    <title>H&S Ramyeon</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+        h1 {
+            text-align: center;
+            color: #d9534f;
+        }
+        h2 {
+            color: #5bc0de;
+        }
+        form {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        label {
+            display: inline-block;
+            width: 100px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="number"], select {
+            width: calc(100% - 120px);
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #5bc0de;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #31b0d5;
+        }
+        #total, #change {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
     <script>
-        // JavaScript function to calculate and update the total
         function calculateTotal() {
             const itemCheckboxes = document.querySelectorAll('input[name="item_id"]:checked');
             let total = 0;
@@ -17,13 +63,40 @@
             });
 
             document.getElementById('total').textContent = 'Total: $' + total.toFixed(2);
+            calculateChange();
+        }
+
+        function calculateChange() {
+            const total = parseFloat(document.getElementById('total').textContent.replace('Total: $', '')) || 0;
+            const moneyReceived = parseFloat(document.getElementById('money_received').value) || 0;
+            const change = moneyReceived - total;
+
+            document.getElementById('change').textContent = 'Change: $' + (change >= 0 ? change.toFixed(2) : '0.00');
         }
     </script>
 </head>
 <body>
-    <h1>Item Management</h1>
+    <h1>H&S Ramyeon</h1>
 
-    <!-- Form to add a new item -->
+    <h2>Available Items</h2>
+    <form action="/make_transaction" method="POST">
+        <ul>
+            {% for item in items %}
+            <li>
+                <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
+                {{ item['type'] }} - {{ item['name'] }}: ${{ item['price'] }}
+            </li>
+            {% endfor %}
+        </ul>
+        <div id="total">Total: $0.00</div>
+        
+        <label for="money_received">Money Received:</label>
+        <input type="number" step="0.01" id="money_received" name="money_received" oninput="calculateChange()">
+        <div id="change">Change: $0.00</div>
+
+        <button type="submit">Make Transaction</button>
+    </form>
+
     <h2>Add New Item</h2>
     <form action="/" method="POST">
         <label for="name">Item Name:</label>
@@ -31,23 +104,16 @@
         
         <label for="price">Price:</label>
         <input type="number" step="0.01" id="price" name="price" required>
+
+        <label for="type">Type:</label>
+        <select id="type" name="type" required>
+            <option value="soup">Soup</option>
+            <option value="stir-fry">Stir-Fry</option>
+            <option value="toppings">Toppings</option>
+            <option value="drinks">Drinks</option>
+        </select>
         
         <button type="submit">Add Item</button>
-    </form>
-
-    <!-- Display list of items for selection -->
-    <h2>Available Items</h2>
-    <form action="/make_transaction" method="POST">
-        <ul>
-            {% for item in items %}
-            <li>
-                <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
-                {{ item['name'] }} - ${{ item['price'] }}
-            </li>
-            {% endfor %}
-        </ul>
-        <div id="total">Total: $0.00</div>
-        <button type="submit">Make Transaction</button>
     </form>
 </body>
 </html>

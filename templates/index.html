@@ -1,0 +1,55 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS System - Transaction</title>
+    <script>
+        async function createTransaction() {
+            const items = [];
+            document.querySelectorAll(".transaction-item").forEach(item => {
+                items.push({ item_id: item.dataset.itemId, quantity: item.value });
+            });
+            const response = await fetch('/create_transaction', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items })
+            });
+            const data = await response.json();
+            if (data.status === 'success') alert("Transaction created! Total: $" + data.total);
+        }
+
+        function addItemToTransaction() {
+            const itemList = document.getElementById("item_list");
+            const itemId = itemList.value;
+            const itemName = itemList.options[itemList.selectedIndex].textContent;
+            const transactionList = document.getElementById("transaction_items");
+            const input = document.createElement("input");
+            input.classList.add("transaction-item");
+            input.dataset.itemId = itemId;
+            input.placeholder = "Quantity for " + itemName;
+            transactionList.appendChild(input);
+        }
+    </script>
+</head>
+<body>
+    <h1>POS System - Transaction</h1>
+    
+    <div>
+        <button onclick="window.location.href='/add_item'">Add Item</button>
+        <button onclick="window.location.href='/inventory'">View Inventory</button>
+    </div>
+
+    <h2>Transaction</h2>
+    <select id="item_list">
+        {% for item in items %}
+            <option value="{{ item['id'] }}">{{ item['name'] }} - ${{ item['price'] }}</option>
+        {% endfor %}
+    </select>
+    <button onclick="addItemToTransaction()">Add Item to Transaction</button>
+    
+    <div id="transaction_items"></div>
+    <button onclick="createTransaction()">Create Transaction</button>
+</body>
+</html>

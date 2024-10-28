@@ -57,6 +57,12 @@
         .item-list {
             margin-top: 20px;
         }
+        .item-type {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e1bee7;
+            border-radius: 8px;
+        }
         .item-entry {
             display: flex;
             justify-content: space-between;
@@ -65,11 +71,14 @@
             padding: 10px 0;
         }
         .edit-button {
-            color: white;
-            border: none;
+            background-color: transparent; /* Remove background */
+            color: #8e24aa; /* Change text color */
+            border: none; /* Remove border */
             font-size: 14px;
             cursor: pointer;
-            margin-left: 10px; /* Space between item name and */
+            margin-left: 10px; /* Space between item name and button */
+            width: auto; /* Allow width to fit the text */
+            padding: 0; /* Remove padding */
         }
     </style>
 </head>
@@ -101,13 +110,23 @@
 
     <div class="item-list">
         <h3>Existing Items</h3>
+        {% set current_type = None %}
         {% for item in items %}
-        <div class="item-entry">
-            <span>{{ item['name'] }} - ₱{{ item['price'] }} ({{ item['type'] }})</span>
-            <form action="/edit_item/{{ item['id'] }}" method="GET" style="display: inline;">
-                <button class="edit-button" type="submit">Edit</button>
-            </form>
-        </div>
+            {% if current_type != item['type'] %}
+                {% if current_type is not none %}
+                    <hr>
+                {% endif %}
+                <div class="item-type">
+                    <h4>{{ item['type'] }}</h4>
+                </div>
+                {% set current_type = item['type'] %}
+            {% endif %}
+            <div class="item-entry">
+                <span>{{ item['name'] }} - ₱{{ item['price'] }}</span>
+                <form action="/edit_item/{{ item['id'] }}" method="GET" style="display: inline;">
+                    <button class="edit-button" type="submit">Edit</button>
+                </form>
+            </div>
         {% endfor %}
     </div>
 </body>

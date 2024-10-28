@@ -5,13 +5,14 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# Database setup
+# Database setup - connects to SQLite and creates tables if they don't exist
 def get_db_connection():
     conn = sqlite3.connect('pos_database.db')
     conn.row_factory = sqlite3.Row
     return conn
 
 def initialize_database():
+    # Create required tables if they don't exist
     conn = get_db_connection()
     conn.execute('''
     CREATE TABLE IF NOT EXISTS items (
@@ -33,20 +34,28 @@ def initialize_database():
     conn.commit()
     conn.close()
 
+# Initialize the database
 initialize_database()
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     conn = get_db_connection()
     
+    # If form submitted, add item to the database
     if request.method == 'POST':
         name = request.form['name']
         price = float(request.form['price'])
         type = request.form['type']
         conn.execute('INSERT INTO items (name, price, type) VALUES (?, ?, ?)', (name, price, type))
         conn.commit()
-    
-    items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
+
+    # Fetch the updated list of items, sorted by type
+    try:
+        items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
+    except Exception as e:
+        print(f"Database query error: {e}")
+        items = []
+
     conn.close()
     return render_template('index.html', items=items)
 
@@ -62,20 +71,21 @@ def add_item(item_id=None):
             type = request.form['type']
             conn.execute('UPDATE items SET name = ?, price = ?, type = ? WHERE id = ?', (name, price, type, item_id))
             conn.commit()
-            return redirect(url_for('index'))
+            return redirect(url_for('index'))  # Redirect back to the main page
         else:  # Adding a new item
             name = request.form['name']
             price = float(request.form['price'])
             type = request.form['type']
             conn.execute('INSERT INTO items (name, price, type) VALUES (?, ?, ?)', (name, price, type))
             conn.commit()
-            return redirect(url_for('index'))
+            return redirect(url_for('index'))  # Redirect back to the main page
 
     if item_id:  # Fetch the item details if we're editing
         item = conn.execute('SELECT * FROM items WHERE id = ?', (item_id,)).fetchone()
         conn.close()
         return render_template('add_item.html', action='Edit', item=item)
 
+    # If no item_id, render an empty form for adding a new item
     conn.close()
     return render_template('add_item.html', action='Add')
 
@@ -97,6 +107,12 @@ def make_transaction():
 
     conn.execute('INSERT INTO transactions (total, money_received, change, time) VALUES (?, ?, ?, ?)',
                  (total, money_received, change, purchase_time))
+    transaction_id = conn.execute('SELECT last_insert_rowid()').fetchone()[0]
+
+    for item in items_purchased:
+        conn.execute('INSERT INTO transaction_items (transaction_id, item_id, item_name, item_price) VALUES (?, ?, ?, ?)',
+                     (transaction_id, item[0], item[1], item[2]))
+
     conn.commit()
     conn.close()
     return render_template('transaction.html', total=total, change=change, purchase_time=purchase_time, items=items_purchased)

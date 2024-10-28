@@ -1,12 +1,18 @@
-
 from flask import Flask, request, jsonify, render_template, redirect, url_for
 import sqlite3
+import os
 
 app = Flask(__name__)
 
-# Database setup - connects to SQLite
+# Path to the database file
+DATABASE_PATH = 'pos_database.db'
+
+# Database connection function
 def get_db_connection():
-    conn = sqlite3.connect('pos_database.db')
+    if not os.path.exists(DATABASE_PATH):
+        # If the database doesn't exist, return an error message to initialize it
+        raise FileNotFoundError("Database not found. Please run `create_db.py` to initialize the database.")
+    conn = sqlite3.connect(DATABASE_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 

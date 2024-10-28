@@ -4,15 +4,44 @@ import sqlite3
 
 app = Flask(__name__)
 
-# Database setup - connects to SQLite
+# Database setup - connects to SQLite and creates tables if they don't exist
 def get_db_connection():
     conn = sqlite3.connect('pos_database.db')
     conn.row_factory = sqlite3.Row
     return conn
 
+def initialize_database():
+    # Create required tables if they don't exist
+    conn = get_db_connection()
+    conn.execute('''
+    CREATE TABLE IF NOT EXISTS items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        price REAL NOT NULL
+    );
+    ''')
+    conn.execute('''
+    CREATE TABLE IF NOT EXISTS inventory (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        item_id INTEGER NOT NULL,
+        quantity INTEGER NOT NULL,
+        FOREIGN KEY (item_id) REFERENCES items (id)
+    );
+    ''')
+    conn.execute('''
+    CREATE TABLE IF NOT EXISTS transactions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        total REAL NOT NULL
+    );
+    ''')
+    conn.commit()
+    conn.close()
+
+# Initialize the database
+initialize_database()
+
 @app.route('/')
 def index():
-    # Main page for viewing items and adding new transactions
     conn = get_db_connection()
     items = conn.execute('SELECT * FROM items').fetchall()
     conn.close()

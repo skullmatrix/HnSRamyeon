@@ -134,7 +134,9 @@ def make_transaction():
 
     conn.commit()
     conn.close()
-    return render_template('transaction.html', total=total, change=change, purchase_time=purchase_time, items=items_purchased)
+
+    # Redirect back to the index page after making the transaction
+    return redirect(url_for('index'))
 
 @app.route('/invoices', methods=['GET'])
 def invoices():

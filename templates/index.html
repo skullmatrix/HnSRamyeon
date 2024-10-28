@@ -54,6 +54,15 @@
             font-size: 18px;
             margin-bottom: 5px;
         }
+        #review-section {
+            background-color: #e0e0e0;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        #review-section h3 {
+            color: #4a148c;
+        }
         button, input[type="number"] {
             font-size: 16px;
             padding: 8px;
@@ -76,16 +85,36 @@
         }
     </style>
     <script>
-        function calculateTotal() {
+        function updateReview() {
+            const reviewSection = document.getElementById('review-section');
+            reviewSection.innerHTML = '<h3>Review Items</h3>';
             let total = 0;
+
             document.querySelectorAll('.item-row').forEach(row => {
                 const checkbox = row.querySelector('input[type="checkbox"]');
-                const quantityInput = row.querySelector('input[type="number"]');
                 if (checkbox.checked) {
                     const price = parseFloat(checkbox.getAttribute('data-price'));
-                    const quantity = parseInt(quantityInput.value) || 1;
-                    total += price * quantity;
+                    const quantityInput = document.createElement('input');
+                    quantityInput.type = 'number';
+                    quantityInput.name = 'quantity';
+                    quantityInput.value = 1;
+                    quantityInput.min = 1;
+                    quantityInput.onchange = calculateTotal;
+
+                    const quantityContainer = document.createElement('div');
+                    quantityContainer.textContent = `${checkbox.dataset.name}: ₱${price}`;
+                    quantityContainer.appendChild(quantityInput);
+                    reviewSection.appendChild(quantityContainer);
                 }
+            });
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            let total = 0;
+            document.querySelectorAll('#review-section input[type="number"]').forEach(input => {
+                const price = parseFloat(input.parentElement.textContent.split('₱')[1]);
+                total += price * (parseInt(input.value) || 1);
             });
             document.getElementById('total').innerText = 'Total: ₱' + total.toFixed(2);
             calculateChange();
@@ -101,7 +130,7 @@
 </head>
 <body>
     <div class="logo">
-        <a href="https://pin.it/aoySh00WA"><img src="/static/logo.jpg" alt="H & S Ramyeon Logo"></a>
+        <a href="https://pin.it/uPcMQKf63"><img src="/static/logo.jpg" alt="H & S Ramyeon Logo"></a>
     </div>
     <h1>H & S Ramyeon</h1>
 
@@ -120,15 +149,19 @@
                 {% for item in items %}
                 {% if item['type'] == type %}
                 <li class="item-row">
-                    <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
+                    <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-name="{{ item['name'] }}" data-price="{{ item['price'] }}" onchange="updateReview()">
                     {{ item['name'] }}: ₱{{ item['price'] }}
-                    <input type="number" name="quantity" value="1" min="1" onchange="calculateTotal()">
                 </li>
                 {% endif %}
                 {% endfor %}
             </ul>
         </div>
         {% endfor %}
+
+        <div id="review-section">
+            <h3>Review Items</h3>
+            <!-- Selected items will appear here with quantity inputs -->
+        </div>
 
         <div id="total">Total: ₱0.00</div>
 

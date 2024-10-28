@@ -17,14 +17,15 @@
             text-align: center;
             color: #6a1b9a;
         }
-        .back-button {
+        .back-button, .export-button {
             display: inline-block;
-            margin-bottom: 15px;
+            margin: 15px 5px;
             padding: 8px 12px;
             background-color: #8e24aa;
             color: white;
             text-decoration: none;
             border-radius: 5px;
+            cursor: pointer;
         }
         table {
             width: 100%;
@@ -32,7 +33,6 @@
             margin-top: 20px;
             background-color: #e1bee7;
             border-radius: 8px;
-            overflow: hidden;
         }
         th, td {
             border: 1px solid #d1c4e9;
@@ -43,16 +43,11 @@
             background-color: #8e24aa;
             color: white;
         }
-        tr:nth-child(even) {
-            background-color: #f3e5f5;
-        }
-        tr:hover {
-            background-color: #ddd;
-        }
     </style>
 </head>
 <body>
     <a href="/" class="back-button">Back</a>
+    <a href="/export_invoices" class="export-button">Export Invoices</a>
     <h1>Invoices</h1>
 
     <table>

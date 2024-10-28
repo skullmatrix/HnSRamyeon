@@ -1,3 +1,4 @@
+
 import os
 from flask import Flask, request, jsonify, render_template, redirect, url_for
 import sqlite3
@@ -40,28 +41,21 @@ def initialize_database():
 # Initialize the database
 initialize_database()
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
     conn = get_db_connection()
+    
+    # If form submitted, add item to the database
+    if request.method == 'POST':
+        name = request.form['name']
+        price = float(request.form['price'])
+        conn.execute('INSERT INTO items (name, price) VALUES (?, ?)', (name, price))
+        conn.commit()
+    
+    # Fetch the updated list of items
     items = conn.execute('SELECT * FROM items').fetchall()
     conn.close()
     return render_template('index.html', items=items)
-
-@app.route('/add_item_page')
-def add_item_page():
-    # Route to render the add_item.html template
-    return render_template('add_item.html')
-
-@app.route('/add_item', methods=['POST'])
-def add_item():
-    # Endpoint to add new items
-    name = request.form['name']
-    price = float(request.form['price'])
-    conn = get_db_connection()
-    conn.execute('INSERT INTO items (name, price) VALUES (?, ?)', (name, price))
-    conn.commit()
-    conn.close()
-    return redirect(url_for('index'))
 
 @app.route('/add_to_inventory', methods=['POST'])
 def add_to_inventory():

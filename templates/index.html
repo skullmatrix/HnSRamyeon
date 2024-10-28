@@ -77,6 +77,16 @@
         button:hover {
             background-color: #7b1fa2;
         }
+        .item-entry {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 5px; /* Space between items */
+        }
+        .quantity-dropdown {
+            margin-left: 10px; /* Space between checkbox and dropdown */
+            padding: 5px;
+        }
     </style>
     <script>
         function filterItems() {
@@ -98,10 +108,19 @@
             let total = 0;
 
             checkboxes.forEach(checkbox => {
-                total += parseFloat(checkbox.getAttribute('data-price'));
+                const price = parseFloat(checkbox.getAttribute('data-price'));
+                const quantity = parseInt(checkbox.closest('.item-entry').querySelector('.quantity-dropdown').value);
+                total += price * quantity;
             });
 
             document.getElementById('total').textContent = 'Total: ₱' + total.toFixed(2);
+        }
+
+        function calculateChange() {
+            const moneyReceived = parseFloat(document.getElementById('money_received').value) || 0;
+            const total = parseFloat(document.getElementById('total').textContent.replace('Total: ₱', '')) || 0;
+            const change = moneyReceived - total;
+            document.getElementById('change').textContent = 'Change: ₱' + (change >= 0 ? change.toFixed(2) : 0);
         }
     </script>
 </head>
@@ -127,8 +146,13 @@
                 {% for item in items %}
                 {% if item['type'] == type %}
                 <li class="item-entry">
-                    <span>{{ item['name'] }}: ₱{{ item['price'] }}</span>
                     <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
+                    <span>{{ item['name'] }}: ₱{{ item['price'] }}</span>
+                    <select class="quantity-dropdown" onchange="calculateTotal()">
+                        {% for i in range(1, 11) %} <!-- Quantity from 1 to 10 -->
+                        <option value="{{ i }}">{{ i }}</option>
+                        {% endfor %}
+                    </select>
                 </li>
                 {% endif %}
                 {% endfor %}

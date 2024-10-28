@@ -31,6 +31,10 @@
             background-color: #e9ecef;
             border-radius: 5px;
         }
+        .item-type h3 {
+            font-size: 18px; /* Smaller font size for types */
+            margin: 0;
+        }
         #total, #change {
             font-weight: bold;
             margin-top: 5px;
@@ -124,3 +128,39 @@
             <h3>Toppings</h3>
             <ul>
                 {% for item in items %}
+                {% if item['type'] == 'toppings' %}
+                <li>
+                    <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
+                    {{ item['name'] }}: ${{ item['price'] }}
+                    <a href="/edit_item/{{ item['id'] }}">Edit</a>  <!-- Edit link -->
+                </li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div id="drinks" class="item-type">
+            <h3>Drinks</h3>
+            <ul>
+                {% for item in items %}
+                {% if item['type'] == 'drinks' %}
+                <li>
+                    <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
+                    {{ item['name'] }}: ${{ item['price'] }}
+                    <a href="/edit_item/{{ item['id'] }}">Edit</a>  <!-- Edit link -->
+                </li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <div id="total">Total: $0.00</div>
+        
+        <label for="money_received">Money:</label>
+        <input type="number" step="0.01" id="money_received" name="money_received" oninput="calculateChange()">
+        <div id="change">Change: $0.00</div>
+
+        <button type="submit">Make Transaction</button>
+    </form>
+</body>
+</html>

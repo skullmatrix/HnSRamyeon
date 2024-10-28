@@ -31,15 +31,6 @@ def initialize_database():
         time TEXT NOT NULL
     );
     ''')
-    conn.execute('''
-    CREATE TABLE IF NOT EXISTS invoices (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        transaction_id INTEGER,
-        item_name TEXT,
-        item_price REAL,
-        FOREIGN KEY(transaction_id) REFERENCES transactions(id)
-    );
-    ''')
     conn.commit()
     conn.close()
 
@@ -57,39 +48,24 @@ def index():
         type = request.form['type']
         conn.execute('INSERT INTO items (name, price, type) VALUES (?, ?, ?)', (name, price, type))
         conn.commit()
-
+    
+    # Fetch the updated list of items, sorted by type
     items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
     conn.close()
     return render_template('index.html', items=items)
 
 @app.route('/add_item', methods=['GET', 'POST'])
-@app.route('/edit_item/<int:item_id>', methods=['GET', 'POST'])
-def add_item(item_id=None):
-    conn = get_db_connection()
-
+def add_item():
     if request.method == 'POST':
-        if item_id:  # Editing an existing item
-            name = request.form['name']
-            price = float(request.form['price'])
-            type = request.form['type']
-            conn.execute('UPDATE items SET name = ?, price = ?, type = ? WHERE id = ?', (name, price, type, item_id))
-            conn.commit()
-            return redirect(url_for('index'))  # Redirect back to the main page
-        else:  # Adding a new item
-            name = request.form['name']
-            price = float(request.form['price'])
-            type = request.form['type']
-            conn.execute('INSERT INTO items (name, price, type) VALUES (?, ?, ?)', (name, price, type))
-            conn.commit()
-            return redirect(url_for('index'))  # Redirect back to the main page
-
-    if item_id:  # Fetch the item details if we're editing
-        item = conn.execute('SELECT * FROM items WHERE id = ?', (item_id,)).fetchone()
+        name = request.form['name']
+        price = float(request.form['price'])
+        type = request.form['type']
+        conn = get_db_connection()
+        conn.execute('INSERT INTO items (name, price, type) VALUES (?, ?, ?)', (name, price, type))
+        conn.commit()
         conn.close()
-        return render_template('add_item.html', action='Edit', item=item)
-
-    conn.close()
-    return render_template('add_item.html', action='Add')
+        return redirect(url_for('index'))  # Redirect back to the main page
+    return render_template('add_item.html')  # Render the add item page
 
 @app.route('/make_transaction', methods=['POST'])
 def make_transaction():
@@ -107,32 +83,17 @@ def make_transaction():
     change = max(0, money_received - total)
     purchase_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    try:
-        # Insert transaction details
-        conn.execute('INSERT INTO transactions (total, money_received, change, time) VALUES (?, ?, ?, ?)',
-                     (total, money_received, change, purchase_time))
-        transaction_id = conn.execute('SELECT last_insert_rowid()').fetchone()[0]
+    conn.execute('INSERT INTO transactions (total, money_received, change, time) VALUES (?, ?, ?, ?)',
+                 (total, money_received, change, purchase_time))
+    transaction_id = conn.execute('SELECT last_insert_rowid()').fetchone()[0]
 
-        # Insert into invoices table
-        for item in items_purchased:
-            conn.execute('INSERT INTO invoices (transaction_id, item_name, item_price) VALUES (?, ?, ?)',
-                         (transaction_id, item[1], item[2]))
+    for item in items_purchased:
+        conn.execute('INSERT INTO transaction_items (transaction_id, item_id, item_name, item_price) VALUES (?, ?, ?, ?)',
+                     (transaction_id, item[0], item[1], item[2]))
 
-        conn.commit()
-    except Exception as e:
-        print(f"Error during transaction processing: {e}")
-        return "An error occurred while processing the transaction.", 500
-    finally:
-        conn.close()
-
-    return redirect(url_for('invoices'))  # Redirect to the invoices page
-
-@app.route('/invoices')
-def invoices():
-    conn = get_db_connection()
-    invoices = conn.execute('SELECT * FROM invoices').fetchall()
+    conn.commit()
     conn.close()
-    return render_template('invoices.html', invoices=invoices)
+    return render_template('transaction.html', total=total, change=change, purchase_time=purchase_time, items=items_purchased)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

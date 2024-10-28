@@ -62,7 +62,55 @@
         button:hover {
             background-color: #7b1fa2;
         }
+        .quantity-input {
+            width: 4ch;
+            text-align: center;
+        }
     </style>
+    <script>
+        function updateReview() {
+            const reviewSection = document.getElementById('review-section');
+            reviewSection.innerHTML = '';
+            let total = 0;
+
+            document.querySelectorAll('.item-row').forEach(row => {
+                const checkbox = row.querySelector('input[type="checkbox"]');
+                if (checkbox.checked) {
+                    const price = parseFloat(checkbox.getAttribute('data-price'));
+                    const quantityInput = document.createElement('input');
+                    quantityInput.type = 'number';
+                    quantityInput.name = 'quantity';
+                    quantityInput.value = 1;
+                    quantityInput.min = 1;
+                    quantityInput.className = 'quantity-input';
+                    quantityInput.onchange = calculateTotal;
+
+                    const quantityContainer = document.createElement('div');
+                    quantityContainer.textContent = `${checkbox.dataset.name}: ₱${price} `;
+                    quantityContainer.appendChild(quantityInput);
+                    reviewSection.appendChild(quantityContainer);
+                }
+            });
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            let total = 0;
+            document.querySelectorAll('#review-section input[type="number"]').forEach(input => {
+                const price = parseFloat(input.parentElement.textContent.split('₱')[1]);
+                total += price * (parseInt(input.value) || 1);
+            });
+            document.getElementById('total').innerText = 'Total: ₱' + total.toFixed(2);
+            calculateChange();
+        }
+
+        function calculateChange() {
+            const total = parseFloat(document.getElementById('total').innerText.replace('Total: ₱', '')) || 0;
+            const moneyReceived = parseFloat(document.getElementById('money_received').value) || 0;
+            const change = Math.max(0, moneyReceived - total);
+            document.getElementById('change').innerText = 'Change: ₱' + change.toFixed(2);
+        }
+    </script>
 </head>
 <body>
     <h1>H & S Ramyeon</h1>
@@ -81,8 +129,8 @@
             <ul>
                 {% for item in items %}
                 {% if item['type'] == type %}
-                <li>
-                    <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}">
+                <li class="item-row">
+                    <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-name="{{ item['name'] }}" data-price="{{ item['price'] }}" onchange="updateReview()">
                     {{ item['name'] }}: ₱{{ item['price'] }}
                 </li>
                 {% endif %}
@@ -91,10 +139,15 @@
         </div>
         {% endfor %}
 
-        <div id="review-section"></div>
+        <div id="review-section">
+            <!-- Selected items with quantities will appear here -->
+        </div>
+
+        <div id="total">Total: ₱0.00</div>
 
         <label for="money_received">Money:</label>
-        <input type="number" step="0.01" id="money_received" name="money_received">
+        <input type="number" step="0.01" id="money_received" name="money_received" oninput="calculateChange()">
+        <div id="change">Change: ₱0.00</div>
 
         <button type="submit">Make Transaction</button>
     </form>

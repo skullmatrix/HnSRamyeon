@@ -172,6 +172,14 @@ def invoices():
     conn.close()
     return render_template('invoices.html', invoices=invoices)
 
+@app.route('/delete_invoice/<int:invoice_id>', methods=['POST'])
+def delete_invoice(invoice_id):
+    conn = get_db_connection()
+    conn.execute('DELETE FROM invoices WHERE id = ?', (invoice_id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('invoices'))
+
 @app.route('/export_invoices', methods=['GET'])
 def export_invoices():
     conn = get_db_connection()

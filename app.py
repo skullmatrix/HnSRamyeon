@@ -1,108 +1,59 @@
+
 from flask import Flask, request, jsonify, render_template, redirect, url_for
 import sqlite3
-import os
 
 app = Flask(__name__)
 
-# Path to the database file
-DATABASE_PATH = 'pos_database.db'
-
-# Database initialization function
-def initialize_database():
-    conn = sqlite3.connect(DATABASE_PATH)
-    conn.execute('''
-    CREATE TABLE IF NOT EXISTS items (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        price REAL NOT NULL
-    );
-    ''')
-    conn.execute('''
-    CREATE TABLE IF NOT EXISTS inventory (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        item_id INTEGER NOT NULL,
-        quantity INTEGER NOT NULL,
-        FOREIGN KEY (item_id) REFERENCES items (id)
-    );
-    ''')
-    conn.execute('''
-    CREATE TABLE IF NOT EXISTS transactions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        total REAL NOT NULL
-    );
-    ''')
-    conn.commit()
-    conn.close()
-    print("Database initialized successfully.")
-
-# Check if the database exists; if not, initialize it
-if not os.path.exists(DATABASE_PATH):
-    initialize_database()
-
-# Function to get database connection
+# Database setup - connects to SQLite
 def get_db_connection():
-    conn = sqlite3.connect(DATABASE_PATH)
+    conn = sqlite3.connect('pos_database.db')
     conn.row_factory = sqlite3.Row
     return conn
 
 @app.route('/')
 def index():
+    # Main page for viewing items and adding new transactions
     conn = get_db_connection()
     items = conn.execute('SELECT * FROM items').fetchall()
     conn.close()
     return render_template('index.html', items=items)
 
-@app.route('/add_item', methods=['GET', 'POST'])
+@app.route('/add_item', methods=['POST'])
 def add_item():
-    if request.method == 'POST':
-        name = request.form['name']
-        price = request.form['price']
-        conn = get_db_connection()
-        conn.execute('INSERT INTO items (name, price) VALUES (?, ?)', (name, price))
-        conn.commit()
-        conn.close()
-        return redirect(url_for('index'))
-    return render_template('add_item.html')
-
-@app.route('/inventory')
-def inventory():
+    # Endpoint to add new items
+    name = request.form['name']
+    price = float(request.form['price'])
     conn = get_db_connection()
-    inventory_data = conn.execute("""
-        SELECT items.id, items.name, items.price, 
-               IFNULL(SUM(inventory.quantity), 0) AS quantity
-        FROM items
-        LEFT JOIN inventory ON items.id = inventory.item_id
-        GROUP BY items.id
-    """).fetchall()
+    conn.execute('INSERT INTO items (name, price) VALUES (?, ?)', (name, price))
+    conn.commit()
     conn.close()
-    return render_template('inventory.html', inventory=inventory_data)
+    return redirect(url_for('index'))
 
-@app.route('/add_inventory', methods=['POST'])
-def add_inventory():
-    data = request.json
-    item_id = data['item_id']
-    quantity = data['quantity']
+@app.route('/add_to_inventory', methods=['POST'])
+def add_to_inventory():
+    # Endpoint to add item quantity to inventory
+    item_id = int(request.form['item_id'])
+    quantity = int(request.form['quantity'])
     conn = get_db_connection()
     conn.execute('INSERT INTO inventory (item_id, quantity) VALUES (?, ?)', (item_id, quantity))
     conn.commit()
     conn.close()
-    return jsonify({'status': 'success'})
+    return redirect(url_for('index'))
 
-@app.route('/create_transaction', methods=['POST'])
-def create_transaction():
-    data = request.json
-    items = data['items']
-    total = 0
+@app.route('/make_transaction', methods=['POST'])
+def make_transaction():
+    # Endpoint to make a transaction and calculate the total
+    item_ids = request.form.getlist('item_id')
     conn = get_db_connection()
-    for item in items:
-        item_id = item['item_id']
-        quantity = item['quantity']
-        price = conn.execute('SELECT price FROM items WHERE id = ?', (item_id,)).fetchone()['price']
-        total += price * int(quantity)
+    total = 0
+    for item_id in item_ids:
+        item = conn.execute('SELECT price FROM items WHERE id = ?', (item_id,)).fetchone()
+        total += item['price']
     conn.execute('INSERT INTO transactions (total) VALUES (?)', (total,))
     conn.commit()
     conn.close()
-    return jsonify({'status': 'success', 'total': total})
+    return render_template('transaction.html', total=total)
 
+# Start the Flask application
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(debug=True)

@@ -1,7 +1,7 @@
-
 import os
 from flask import Flask, request, jsonify, render_template, redirect, url_for
 import sqlite3
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -18,7 +18,8 @@ def initialize_database():
     CREATE TABLE IF NOT EXISTS items (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        price REAL NOT NULL
+        price REAL NOT NULL,
+        type TEXT NOT NULL
     );
     ''')
     conn.execute('''
@@ -32,7 +33,19 @@ def initialize_database():
     conn.execute('''
     CREATE TABLE IF NOT EXISTS transactions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        total REAL NOT NULL
+        total REAL NOT NULL,
+        money_received REAL NOT NULL,
+        change REAL NOT NULL,
+        time TEXT NOT NULL
+    );
+    ''')
+    conn.execute('''
+    CREATE TABLE IF NOT EXISTS transaction_items (
+        transaction_id INTEGER,
+        item_id INTEGER,
+        item_name TEXT,
+        item_price REAL,
+        FOREIGN KEY (transaction_id) REFERENCES transactions (id)
     );
     ''')
     conn.commit()
@@ -49,38 +62,47 @@ def index():
     if request.method == 'POST':
         name = request.form['name']
         price = float(request.form['price'])
-        conn.execute('INSERT INTO items (name, price) VALUES (?, ?)', (name, price))
+        type = request.form['type']
+        conn.execute('INSERT INTO items (name, price, type) VALUES (?, ?, ?)', (name, price, type))
         conn.commit()
     
-    # Fetch the updated list of items
-    items = conn.execute('SELECT * FROM items').fetchall()
+    # Fetch the updated list of items, sorted by type
+    items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
     conn.close()
     return render_template('index.html', items=items)
 
-@app.route('/add_to_inventory', methods=['POST'])
-def add_to_inventory():
-    # Endpoint to add item quantity to inventory
-    item_id = int(request.form['item_id'])
-    quantity = int(request.form['quantity'])
-    conn = get_db_connection()
-    conn.execute('INSERT INTO inventory (item_id, quantity) VALUES (?, ?)', (item_id, quantity))
-    conn.commit()
-    conn.close()
-    return redirect(url_for('index'))
-
 @app.route('/make_transaction', methods=['POST'])
 def make_transaction():
-    # Endpoint to make a transaction and calculate the total
+    # Endpoint to process transaction, calculate total and change, and store purchase details
     item_ids = request.form.getlist('item_id')
+    money_received = float(request.form['money_received'])
     conn = get_db_connection()
     total = 0
+    items_purchased = []
+
+    # Calculate total and gather item details
     for item_id in item_ids:
-        item = conn.execute('SELECT price FROM items WHERE id = ?', (item_id,)).fetchone()
+        item = conn.execute('SELECT * FROM items WHERE id = ?', (item_id,)).fetchone()
         total += item['price']
-    conn.execute('INSERT INTO transactions (total) VALUES (?)', (total,))
+        items_purchased.append((item_id, item['name'], item['price']))
+
+    # Calculate change
+    change = max(0, money_received - total)
+    purchase_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    # Insert transaction details
+    conn.execute('INSERT INTO transactions (total, money_received, change, time) VALUES (?, ?, ?, ?)',
+                 (total, money_received, change, purchase_time))
+    transaction_id = conn.execute('SELECT last_insert_rowid()').fetchone()[0]
+
+    # Insert each purchased item in transaction_items
+    for item in items_purchased:
+        conn.execute('INSERT INTO transaction_items (transaction_id, item_id, item_name, item_price) VALUES (?, ?, ?, ?)',
+                     (transaction_id, item[0], item[1], item[2]))
+
     conn.commit()
     conn.close()
-    return render_template('transaction.html', total=total)
+    return render_template('transaction.html', total=total, change=change, purchase_time=purchase_time, items=items_purchased)
 
 # Start the Flask application with the port provided by Render
 if __name__ == '__main__':

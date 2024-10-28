@@ -57,12 +57,6 @@
             font-size: 18px;
             margin-bottom: 5px;
         }
-        .item-entry {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            margin-bottom: 5px; /* Space between items */
-        }
         button, input[type="number"] {
             font-size: 16px;
             padding: 8px;
@@ -82,6 +76,12 @@
         }
         button:hover {
             background-color: #7b1fa2;
+        }
+        .item-entry {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 5px; /* Space between items */
         }
         .quantity-dropdown {
             margin-left: 10px; /* Space between checkbox and dropdown */
@@ -122,6 +122,16 @@
             const change = moneyReceived - total;
             document.getElementById('change').textContent = 'Change: ₱' + (change >= 0 ? change.toFixed(2) : 0);
         }
+
+        function promptForMoney() {
+            const total = document.getElementById('total').textContent.replace('Total: ₱', '');
+            const moneyReceived = prompt(`Total is ₱${total}. Please enter the amount of money received:`);
+
+            if (moneyReceived) {
+                document.getElementById('money_received').value = parseFloat(moneyReceived);
+                calculateChange(); // Update change display
+            }
+        }
     </script>
 </head>
 <body>
@@ -155,21 +165,14 @@
         </div>
         {% endfor %}
 
-        <h3>Review Transaction</h3>
-        <label for="quantity">Select Quantity:</label>
-        <select class="quantity-dropdown" name="quantity" onchange="calculateTotal()">
-            {% for i in range(1, 11) %} <!-- Quantity from 1 to 10 -->
-            <option value="{{ i }}">{{ i }}</option>
-            {% endfor %}
-        </select>
-
         <div id="total">Total: ₱0.00</div>
 
         <label for="money_received">Money:</label>
-        <input type="number" step="0.01" id="money_received" name="money_received" oninput="calculateChange()">
+        <input type="number" step="0.01" id="money_received" name="money_received" oninput="calculateChange()" readonly>
+        
         <div id="change">Change: ₱0.00</div>
 
-        <button type="submit">Make Transaction</button>
+        <button type="button" onclick="promptForMoney()">Make Transaction</button>
     </form>
 </body>
 </html>

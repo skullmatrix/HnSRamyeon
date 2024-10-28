@@ -43,6 +43,65 @@ def initialize_database():
     );
     ''')
     conn.commit()
+
+    # Populate items if the table is empty
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM items")
+    if cursor.fetchone()[0] == 0:
+        items = [
+            # Soup Base
+            ("Cheese Ramen Spicy", 99, "Soup Base"),
+            ("Nongshim", 89, "Soup Base"),
+            ("Ottogi Cheese Ramen", 91, "Soup Base"),
+            ("Nongshim JJWANG", 129, "Soup Base"),
+            ("SOON Ramen", 99, "Soup Base"),
+            ("JIN Ramen", 89, "Soup Base"),
+            # Stir Fry
+            ("Buldak Carbonara", 129, "Stir Fry"),
+            ("Buldak Black", 129, "Stir Fry"),
+            ("Buldak 2X Spicy", 129, "Stir Fry"),
+            ("Cheese Ramen Stir Fry", 129, "Stir Fry"),
+            # Cups
+            ("JIN Ramen Cup", 63, "Cups"),
+            ("Shrimp Cup Ramen Small", 52, "Cups"),
+            ("Nongshim Squid Jampong Cup", 59, "Cups"),
+            ("Paldo Pororo Cup", 59, "Cups"),
+            # Toppings
+            ("Raw Egg", 15, "Toppings"),
+            ("Boiled Egg", 19, "Toppings"),
+            ("Sliced Cheese", 15, "Toppings"),
+            ("Lobster Ball", 19, "Toppings"),
+            ("Lobster Stick", 15, "Toppings"),
+            ("Fish Cake", 15, "Toppings"),
+            ("Ham", 15, "Toppings"),
+            ("Golden Cheese Ball", 15, "Toppings"),
+            ("Crab Stick", 19, "Toppings"),
+            ("Fishball", 15, "Toppings"),
+            ("Kimchi", 19, "Toppings"),
+            ("Namkwang Seaweed", 19, "Toppings"),
+            ("Shabu2x Mix", 29, "Toppings"),
+            ("Sajo Gochujang", 76, "Toppings"),
+            ("Ssamjang", 68, "Toppings"),
+            ("Sanjo Doenjang", 68, "Toppings"),
+            ("Lotte Luncheon Meat", 119, "Toppings"),
+            # Sweets
+            ("Ice Cream Cone", 11, "Sweets"),
+            ("Pepero", 59, "Sweets"),
+            ("Almond Choco Ball", 69, "Sweets"),
+            # Drinks
+            ("Ice Talk", 59, "Drinks"),
+            ("Welch’s", 70, "Drinks"),
+            ("Jinro Soju", 110, "Drinks"),
+            ("Binggrae Milk", 59, "Drinks"),
+            ("Flavored Yakult", 59, "Drinks"),
+            ("Yakult Orig", 39, "Drinks"),
+            ("Milkis", 49, "Drinks"),
+            ("Chupa Chups", 69, "Drinks"),
+            ("Caffee Latte Can", 49, "Drinks")
+        ]
+        cursor.executemany('INSERT INTO items (name, price, type) VALUES (?, ?, ?)', items)
+        conn.commit()
+
     conn.close()
 
 # Initialize the database

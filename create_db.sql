@@ -1,35 +1,61 @@
 import sqlite3
 
-# Connect to SQLite database (this will create it if it doesn't exist)
-conn = sqlite3.connect('pos_database.db')
+def add_items_to_database():
+    conn = sqlite3.connect('pos_database.db')  # Ensure this path matches your database file's location
+    cursor = conn.cursor()
 
-# Create tables
-conn.execute('''
-CREATE TABLE IF NOT EXISTS items (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    price REAL NOT NULL
-);
-''')
+    # List of items from the image, formatted as (name, price, type)
+    items = [
+        # Soup Base
+        ("Cheese Ramen Spicy", 99, "Soup Base"),
+        ("Nongshim", 89, "Soup Base"),
+        ("Ottogi Cheese Ramen", 99, "Soup Base"),
+        ("Nongshim Jjwang", 129, "Soup Base"),
+        ("Soon Ramen", 129, "Soup Base"),
+        ("Jin Ramen", 89, "Soup Base"),
+        # Stir Fry
+        ("Buldak Black", 129, "Stir Fry"),
+        ("Buldak 2X Spicy", 129, "Stir Fry"),
+        ("Cheese Ramen Stir Fry", 129, "Stir Fry"),
+        # Cups
+        ("Jin Ramen Cup", 63, "Cups"),
+        ("Shrimp Cup Ramen Small", 52, "Cups"),
+        ("Nongshim Squid Jjampong Cup", 55, "Cups"),
+        ("Paldo Pororo Cup", 59, "Cups"),
+        # Toppings
+        ("Raw Egg", 15, "Toppings"),
+        ("Boiled Egg", 19, "Toppings"),
+        ("Sliced Cheese", 19, "Toppings"),
+        ("Lobster Ball", 19, "Toppings"),
+        ("Lobster Stick", 19, "Toppings"),
+        ("Fish Cake", 15, "Toppings"),
+        ("Ham", 15, "Toppings"),
+        ("Golden Cheese Ball", 15, "Toppings"),
+        ("Crab Stick", 19, "Toppings"),
+        ("Fishball", 19, "Toppings"),
+        ("Kimchi", 16, "Toppings"),
+        ("Jjamkwang Seaweed", 29, "Toppings"),
+        ("Shabuzz Mix", 19, "Toppings"),
+        # Sweets
+        ("Ice Cream Cone", 11, "Sweets"),
+        ("Pepero", 59, "Sweets"),
+        ("Almond Choco Ball", 69, "Sweets"),
+        # Drinks
+        ("Ice Talk", 60, "Drinks"),
+        ("Welch's", 70, "Drinks"),
+        ("Jinro Soju", 68, "Drinks"),
+        ("Binggrae Milk", 110, "Drinks"),
+        ("Flavored Yakult", 59, "Drinks"),
+        ("Yakult Orig", 49, "Drinks"),
+        ("Milkis", 39, "Drinks"),
+        ("Chupa Chups", 69, "Drinks"),
+        ("Caffee Latte Can", 49, "Drinks")
+    ]
 
-conn.execute('''
-CREATE TABLE IF NOT EXISTS inventory (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    item_id INTEGER NOT NULL,
-    quantity INTEGER NOT NULL,
-    FOREIGN KEY (item_id) REFERENCES items (id)
-);
-''')
+    # Insert items into the database
+    cursor.executemany('INSERT INTO items (name, price, type) VALUES (?, ?, ?)', items)
+    conn.commit()  # Commit the changes
+    conn.close()  # Close the connection
 
-conn.execute('''
-CREATE TABLE IF NOT EXISTS transactions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    total REAL NOT NULL
-);
-''')
-
-# Commit and close the connection
-conn.commit()
-conn.close()
-
-print("Database initialized successfully.")
+if __name__ == "__main__":
+    add_items_to_database()

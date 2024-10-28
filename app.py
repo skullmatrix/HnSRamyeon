@@ -1,9 +1,8 @@
 import os
-from flask import Flask, request, render_template, redirect, url_for, send_file
+from flask import Flask, request, render_template, redirect, url_for
 import sqlite3
 from datetime import datetime
 import pytz
-import pdfkit
 
 app = Flask(__name__)
 
@@ -53,7 +52,46 @@ def initialize_database():
             ("Cheese Ramen Spicy", 99, "Soup Base"),
             ("Nongshim", 89, "Soup Base"),
             ("Ottogi Cheese Ramen", 91, "Soup Base"),
-            # Add additional items as needed
+            ("Nongshim JJWANG", 129, "Soup Base"),
+            ("SOON Ramen", 99, "Soup Base"),
+            ("JIN Ramen", 89, "Soup Base"),
+            ("Buldak Carbonara", 129, "Stir Fry"),
+            ("Buldak Black", 129, "Stir Fry"),
+            ("Buldak 2X Spicy", 129, "Stir Fry"),
+            ("Cheese Ramen Stir Fry", 129, "Stir Fry"),
+            ("JIN Ramen Cup", 63, "Cups"),
+            ("Shrimp Cup Ramen Small", 52, "Cups"),
+            ("Nongshim Squid Jampong Cup", 59, "Cups"),
+            ("Paldo Pororo Cup", 59, "Cups"),
+            ("Raw Egg", 15, "Toppings"),
+            ("Boiled Egg", 19, "Toppings"),
+            ("Sliced Cheese", 15, "Toppings"),
+            ("Lobster Ball", 19, "Toppings"),
+            ("Lobster Stick", 15, "Toppings"),
+            ("Fish Cake", 15, "Toppings"),
+            ("Ham", 15, "Toppings"),
+            ("Golden Cheese Ball", 15, "Toppings"),
+            ("Crab Stick", 19, "Toppings"),
+            ("Fishball", 15, "Toppings"),
+            ("Kimchi", 19, "Toppings"),
+            ("Namkwang Seaweed", 19, "Toppings"),
+            ("Shabu2x Mix", 29, "Toppings"),
+            ("Sajo Gochujang", 76, "Toppings"),
+            ("Ssamjang", 68, "Toppings"),
+            ("Sanjo Doenjang", 68, "Toppings"),
+            ("Lotte Luncheon Meat", 119, "Toppings"),
+            ("Ice Cream Cone", 11, "Sweets"),
+            ("Pepero", 59, "Sweets"),
+            ("Almond Choco Ball", 69, "Sweets"),
+            ("Ice Talk", 59, "Drinks"),
+            ("Welch’s", 70, "Drinks"),
+            ("Jinro Soju", 110, "Drinks"),
+            ("Binggrae Milk", 59, "Drinks"),
+            ("Flavored Yakult", 59, "Drinks"),
+            ("Yakult Orig", 39, "Drinks"),
+            ("Milkis", 49, "Drinks"),
+            ("Chupa Chups", 69, "Drinks"),
+            ("Caffee Latte Can", 49, "Drinks")
         ]
         cursor.executemany('INSERT INTO items (name, price, type) VALUES (?, ?, ?)', items)
         conn.commit()
@@ -140,19 +178,6 @@ def invoices():
     invoices = conn.execute('SELECT * FROM invoices ORDER BY time DESC').fetchall()
     conn.close()
     return render_template('invoices.html', invoices=invoices)
-
-# Route to generate and download PDF of invoices
-@app.route('/download_invoices', methods=['GET'])
-def download_invoices():
-    conn = get_db_connection()
-    invoices = conn.execute('SELECT * FROM invoices ORDER BY time DESC').fetchall()
-    conn.close()
-
-    rendered_html = render_template('invoices.html', invoices=invoices)
-    pdf_path = "/tmp/invoices.pdf"
-    pdfkit.from_string(rendered_html, pdf_path)
-
-    return send_file(pdf_path, as_attachment=True, download_name="invoices.pdf")
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

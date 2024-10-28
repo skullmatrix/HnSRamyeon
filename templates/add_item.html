@@ -59,16 +59,16 @@
         }
         .item-type {
             margin-top: 15px;
-            padding: 10px 0;
             font-weight: bold;
             font-size: 18px;
+            border-bottom: 2px solid #d1c4e9; /* Optional: add a bottom border for better separation */
+            padding-bottom: 5px; /* Space below the type heading */
         }
         .item-entry {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #d1c4e9;
-            padding: 10px 0;
+            padding: 5px 0; /* Reduce padding for item entries */
         }
         .edit-button {
             padding: 5px 10px; /* Smaller padding */
@@ -115,7 +115,7 @@
         {% for item in items %}
             {% if current_type != item['type'] %}
                 {% if current_type is not none %}
-                    <hr>
+                    <hr> <!-- Optional: add a horizontal line to separate types -->
                 {% endif %}
                 <div class="item-type">{{ item['type'] }}</div>
                 {% set current_type = item['type'] %}

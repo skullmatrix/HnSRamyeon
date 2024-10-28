@@ -18,7 +18,7 @@
             color: #d9534f;
         }
         .nav {
-            text-align: right; /* Align the button to the right */
+            text-align: right;
             margin-bottom: 20px;
         }
         .nav a {
@@ -58,7 +58,7 @@
     <h1>Invoices</h1>
     
     <div class="nav">
-        <a href="/">Back</a> <!-- Link to go back to the index page -->
+        <a href="/">Back</a>
     </div>
     
     <table>
@@ -74,9 +74,9 @@
         <tr>
             <td>{{ invoice['id'] }}</td>
             <td>{{ invoice['time'] }}</td>
-            <td>${{ invoice['total'] }}</td>
-            <td>${{ invoice['money_received'] }}</td>
-            <td>${{ invoice['change'] }}</td>
+            <td>₱{{ invoice['total'] }}</td>
+            <td>₱{{ invoice['money_received'] }}</td>
+            <td>₱{{ invoice['change'] }}</td>
             <td>{{ invoice['items'] }}</td>
         </tr>
         {% endfor %}

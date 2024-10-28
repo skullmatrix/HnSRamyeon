@@ -7,18 +7,46 @@ app = Flask(__name__)
 # Path to the database file
 DATABASE_PATH = 'pos_database.db'
 
-# Database connection function
+# Database initialization function
+def initialize_database():
+    conn = sqlite3.connect(DATABASE_PATH)
+    conn.execute('''
+    CREATE TABLE IF NOT EXISTS items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        price REAL NOT NULL
+    );
+    ''')
+    conn.execute('''
+    CREATE TABLE IF NOT EXISTS inventory (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        item_id INTEGER NOT NULL,
+        quantity INTEGER NOT NULL,
+        FOREIGN KEY (item_id) REFERENCES items (id)
+    );
+    ''')
+    conn.execute('''
+    CREATE TABLE IF NOT EXISTS transactions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        total REAL NOT NULL
+    );
+    ''')
+    conn.commit()
+    conn.close()
+    print("Database initialized successfully.")
+
+# Check if the database exists; if not, initialize it
+if not os.path.exists(DATABASE_PATH):
+    initialize_database()
+
+# Function to get database connection
 def get_db_connection():
-    if not os.path.exists(DATABASE_PATH):
-        # If the database doesn't exist, return an error message to initialize it
-        raise FileNotFoundError("Database not found. Please run `create_db.py` to initialize the database.")
     conn = sqlite3.connect(DATABASE_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
 @app.route('/')
 def index():
-    # Main page for creating transactions
     conn = get_db_connection()
     items = conn.execute('SELECT * FROM items').fetchall()
     conn.close()
@@ -26,7 +54,6 @@ def index():
 
 @app.route('/add_item', methods=['GET', 'POST'])
 def add_item():
-    # Page for adding new items to the inventory
     if request.method == 'POST':
         name = request.form['name']
         price = request.form['price']
@@ -39,7 +66,6 @@ def add_item():
 
 @app.route('/inventory')
 def inventory():
-    # Page to view current inventory levels
     conn = get_db_connection()
     inventory_data = conn.execute("""
         SELECT items.id, items.name, items.price, 

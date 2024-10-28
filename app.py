@@ -41,24 +41,20 @@ def initialize_database():
     cursor.execute("SELECT COUNT(*) FROM items")
     if cursor.fetchone()[0] == 0:
         items = [
-            # Soup Base
             ("Cheese Ramen Spicy", 99, "Soup Base"),
-            ("JIN Ramen", 69, "Soup Base"),
             ("Nongshim", 89, "Soup Base"),
-            ("Nongshim JJWANG", 129, "Soup Base"),
             ("Ottogi Cheese Ramen", 99, "Soup Base"),
+            ("Nongshim JJWANG", 129, "Soup Base"),
             ("SOON Ramen", 99, "Soup Base"),
-            # Stir Fry
+            ("JIN Ramen", 69, "Soup Base"),
             ("Buldak 2X Spicy", 129, "Stir Fry"),
             ("Buldak Black", 119, "Stir Fry"),
             ("Buldak Carbonara", 109, "Stir Fry"),
             ("Cheese Ramen Stir Fry", 109, "Stir Fry"),
-            # Cups
             ("JIN Ramen Cup", 63, "Cups"),
             ("Nongshim Squid Jampong Cup", 55, "Cups"),
             ("Paldo Pororo Cup", 59, "Cups"),
             ("Shrimp Cup Ramen Small", 52, "Cups"),
-            # Toppings
             ("Boiled Egg", 19, "Toppings"),
             ("Crab Stick", 15, "Toppings"),
             ("Fish Cake", 15, "Toppings"),
@@ -76,11 +72,9 @@ def initialize_database():
             ("Shabu2x Mix", 15, "Toppings"),
             ("Sliced Cheese", 19, "Toppings"),
             ("Ssamjang", 78, "Toppings"),
-            # Sweets
             ("Almond Choco Ball", 69, "Sweets"),
             ("Ice Cream Cone", 10, "Sweets"),
             ("Pepero", 59, "Sweets"),
-            # Drinks
             ("Binggrae Milk", 59, "Drinks"),
             ("Caffee Latte Can", 49, "Drinks"),
             ("Chupa Chups", 69, "Drinks"),
@@ -102,6 +96,12 @@ initialize_database()
 def index():
     conn = get_db_connection()
     items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
+    
+    # Handle search functionality
+    search_query = request.form.get('search_query')
+    if search_query:
+        items = [item for item in items if search_query.lower() in item['name'].lower()]
+
     conn.close()
     return render_template('index.html', items=items)
 
@@ -171,14 +171,6 @@ def invoices():
     invoices = conn.execute('SELECT * FROM invoices ORDER BY time DESC').fetchall()
     conn.close()
     return render_template('invoices.html', invoices=invoices)
-
-@app.route('/delete_invoice/<int:invoice_id>', methods=['POST'])
-def delete_invoice(invoice_id):
-    conn = get_db_connection()
-    conn.execute('DELETE FROM invoices WHERE id = ?', (invoice_id,))
-    conn.commit()
-    conn.close()
-    return redirect(url_for('invoices'))
 
 @app.route('/export_invoices', methods=['GET'])
 def export_invoices():

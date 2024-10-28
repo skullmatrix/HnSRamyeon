@@ -16,67 +16,23 @@
             text-align: center;
             color: #d9534f;
         }
-        h2 {
+        nav {
+            margin-bottom: 20px;
+        }
+        nav a {
+            margin-right: 20px;
+            text-decoration: none;
             color: #5bc0de;
         }
-        form {
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        label {
-            display: inline-block;
-            width: 100px;
-            font-weight: bold;
-        }
-        input[type="text"], input[type="number"], select {
-            width: calc(100% - 120px);
-            padding: 5px;
-            margin-bottom: 10px;
-        }
-        button {
-            padding: 10px 15px;
-            background-color: #5bc0de;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #31b0d5;
-        }
-        #total, #change {
-            font-weight: bold;
-            margin-top: 10px;
-        }
     </style>
-    <script>
-        function calculateTotal() {
-            const itemCheckboxes = document.querySelectorAll('input[name="item_id"]:checked');
-            let total = 0;
-
-            itemCheckboxes.forEach((checkbox) => {
-                const price = parseFloat(checkbox.getAttribute('data-price'));
-                total += price;
-            });
-
-            document.getElementById('total').textContent = 'Total: $' + total.toFixed(2);
-            calculateChange();
-        }
-
-        function calculateChange() {
-            const total = parseFloat(document.getElementById('total').textContent.replace('Total: $', '')) || 0;
-            const moneyReceived = parseFloat(document.getElementById('money_received').value) || 0;
-            const change = moneyReceived - total;
-
-            document.getElementById('change').textContent = 'Change: $' + (change >= 0 ? change.toFixed(2) : '0.00');
-        }
-    </script>
 </head>
 <body>
     <h1>H&S Ramyeon</h1>
+    
+    <nav>
+        <a href="/add_item">Add Item</a>
+        <a href="/invoices">View Invoices</a>
+    </nav>
 
     <h2>Available Items</h2>
     <form action="/make_transaction" method="POST">
@@ -95,25 +51,6 @@
         <div id="change">Change: $0.00</div>
 
         <button type="submit">Make Transaction</button>
-    </form>
-
-    <h2>Add New Item</h2>
-    <form action="/" method="POST">
-        <label for="name">Item Name:</label>
-        <input type="text" id="name" name="name" required>
-        
-        <label for="price">Price:</label>
-        <input type="number" step="0.01" id="price" name="price" required>
-
-        <label for="type">Type:</label>
-        <select id="type" name="type" required>
-            <option value="soup">Soup</option>
-            <option value="stir-fry">Stir-Fry</option>
-            <option value="toppings">Toppings</option>
-            <option value="drinks">Drinks</option>
-        </select>
-        
-        <button type="submit">Add Item</button>
     </form>
 </body>
 </html>

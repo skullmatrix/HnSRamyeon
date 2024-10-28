@@ -47,6 +47,11 @@ def index():
     conn.close()
     return render_template('index.html', items=items)
 
+@app.route('/add_item_page')
+def add_item_page():
+    # Route to render the add_item.html template
+    return render_template('add_item.html')
+
 @app.route('/add_item', methods=['POST'])
 def add_item():
     # Endpoint to add new items

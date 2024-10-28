@@ -5,6 +5,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Item Management</title>
+    <script>
+        // JavaScript function to calculate and update the total
+        function calculateTotal() {
+            const itemCheckboxes = document.querySelectorAll('input[name="item_id"]:checked');
+            let total = 0;
+
+            itemCheckboxes.forEach((checkbox) => {
+                const price = parseFloat(checkbox.getAttribute('data-price'));
+                total += price;
+            });
+
+            document.getElementById('total').textContent = 'Total: $' + total.toFixed(2);
+        }
+    </script>
 </head>
 <body>
     <h1>Item Management</h1>
@@ -27,11 +41,12 @@
         <ul>
             {% for item in items %}
             <li>
-                <input type="checkbox" name="item_id" value="{{ item['id'] }}">
+                <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-price="{{ item['price'] }}" onchange="calculateTotal()">
                 {{ item['name'] }} - ${{ item['price'] }}
             </li>
             {% endfor %}
         </ul>
+        <div id="total">Total: $0.00</div>
         <button type="submit">Make Transaction</button>
     </form>
 </body>

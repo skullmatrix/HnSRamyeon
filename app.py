@@ -1,12 +1,11 @@
 import os
 import csv
-from flask import Flask, request, render_template, redirect, url_for, send_file, flash
+from flask import Flask, request, render_template, redirect, url_for, send_file
 import sqlite3
 from datetime import datetime
 import pytz
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Needed for flash messages
 
 # Database connection
 def get_db_connection():
@@ -132,39 +131,34 @@ def edit_item(item_id):
 
 @app.route('/make_transaction', methods=['POST'])
 def make_transaction():
-    try:
-        item_ids = request.form.getlist('item_id')
-        quantities = request.form.getlist('quantity')
-        money_received = int(request.form['money_received'])
-        conn = get_db_connection()
-        total = 0
-        items_purchased = []
+    item_ids = request.form.getlist('item_id')
+    quantities = request.form.getlist('quantity')
+    money_received = int(request.form['money_received'])
+    conn = get_db_connection()
+    total = 0
+    items_purchased = []
 
-        for i, item_id in enumerate(item_ids):
-            item = conn.execute('SELECT * FROM items WHERE id = ?', (item_id,)).fetchone()
-            quantity = int(quantities[i])
-            item_total = item['price'] * quantity
-            total += item_total
-            items_purchased.append((item['name'], item['price'], quantity, item_total))
+    for i, item_id in enumerate(item_ids):
+        item = conn.execute('SELECT * FROM items WHERE id = ?', (item_id,)).fetchone()
+        quantity = int(quantities[i])
+        item_total = item['price'] * quantity
+        total += item_total
+        items_purchased.append((item['name'], item['price'], quantity, item_total))
 
-        change = max(0, money_received - total)
+    change = max(0, money_received - total)
 
-        philippine_tz = pytz.timezone('Asia/Manila')
-        purchase_time = datetime.now(philippine_tz).strftime('%Y-%m-%d %H:%M:%S')
+    philippine_tz = pytz.timezone('Asia/Manila')
+    purchase_time = datetime.now(philippine_tz).strftime('%Y-%m-%d %H:%M:%S')
 
-        items_details = ', '.join([f"{name} (x{quantity}) ₱{item_total}" for name, price, quantity, item_total in items_purchased])
-        conn.execute('INSERT INTO invoices (total, money_received, change, time, items) VALUES (?, ?, ?, ?, ?)',
-                     (total, money_received, change, purchase_time, items_details))
+    items_details = ', '.join([f"{name} (x{quantity}) P{item_total}" for name, price, quantity, item_total in items_purchased])
+    conn.execute('INSERT INTO invoices (total, money_received, change, time, items) VALUES (?, ?, ?, ?, ?)',
+                 (total, money_received, change, purchase_time, items_details))
 
-        conn.commit()
-        conn.close()
-        
-        return redirect(url_for('index'))
-
-    except Exception as e:
-        # Handle the exception
-        flash(f"An error occurred while processing the transaction: {str(e)}")
-        return redirect(url_for('index'))
+    conn.commit()
+    conn.close()
+    
+    # Redirect to index after making a transaction
+    return redirect(url_for('index'))
 
 @app.route('/invoices', methods=['GET'])
 def invoices():
@@ -191,7 +185,7 @@ def export_invoices():
                 invoice['total'], 
                 invoice['money_received'], 
                 invoice['change'], 
-                invoice['items']
+                invoice['items'].replace('₱', 'P')  # Replace ₱ with P
             ])
 
     # Send the file as a download

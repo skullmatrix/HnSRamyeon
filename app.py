@@ -2,6 +2,7 @@ import os
 from flask import Flask, request, render_template, redirect, url_for
 import sqlite3
 from datetime import datetime
+import pytz  # To handle timezone
 
 app = Flask(__name__)
 
@@ -31,6 +32,16 @@ def initialize_database():
         time TEXT NOT NULL
     );
     ''')
+    conn.execute('''
+    CREATE TABLE IF NOT EXISTS invoices (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        total REAL NOT NULL,
+        money_received REAL NOT NULL,
+        change REAL NOT NULL,
+        time TEXT NOT NULL,
+        items TEXT NOT NULL
+    );
+    ''')
     conn.commit()
     conn.close()
 
@@ -46,7 +57,13 @@ def index():
         name = request.form['name']
         price = float(request.form['price'])
         type = request.form['type']
-        conn.execute('INSERT INTO items (name, price, type) VALUES (?, ?, ?)', (name, price, type))
+        item_id = request.form.get('item_id')  # Get the item ID if it exists
+        
+        if item_id:  # If editing an existing item
+            conn.execute('UPDATE items SET name = ?, price = ?, type = ? WHERE id = ?', (name, price, type, item_id))
+        else:  # If adding a new item
+            conn.execute('INSERT INTO items (name, price, type) VALUES (?, ?, ?)', (name, price, type))
+        
         conn.commit()
     
     # Fetch the updated list of items, sorted by type
@@ -56,6 +73,10 @@ def index():
 
 @app.route('/add_item', methods=['GET', 'POST'])
 def add_item():
+    conn = get_db_connection()
+    items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()  # Fetch existing items for display
+    conn.close()
+    
     if request.method == 'POST':
         name = request.form['name']
         price = float(request.form['price'])
@@ -71,11 +92,8 @@ def add_item():
         conn.commit()
         conn.close()
         return redirect(url_for('index'))  # Redirect back to the main page
-    else:
-        conn = get_db_connection()
-        items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()  # Fetch existing items for display
-        conn.close()
-        return render_template('add_item.html', items=items)  # Render the add/edit item page
+
+    return render_template('add_item.html', items=items)  # Render the add/edit item page
 
 @app.route('/edit_item/<int:item_id>', methods=['GET'])
 def edit_item(item_id):
@@ -97,22 +115,33 @@ def make_transaction():
     for item_id in item_ids:
         item = conn.execute('SELECT * FROM items WHERE id = ?', (item_id,)).fetchone()
         total += item['price']
-        items_purchased.append((item_id, item['name'], item['price']))
+        items_purchased.append((item['name'], item['price']))
 
     change = max(0, money_received - total)
-    purchase_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
+    # Get the current time in the Philippines timezone
+    philippine_tz = pytz.timezone('Asia/Manila')
+    purchase_time = datetime.now(philippine_tz).strftime('%Y-%m-%d %H:%M:%S')
+
+    # Insert transaction into the database
     conn.execute('INSERT INTO transactions (total, money_received, change, time) VALUES (?, ?, ?, ?)',
                  (total, money_received, change, purchase_time))
-    transaction_id = conn.execute('SELECT last_insert_rowid()').fetchone()[0]
-
-    for item in items_purchased:
-        conn.execute('INSERT INTO transaction_items (transaction_id, item_id, item_name, item_price) VALUES (?, ?, ?, ?)',
-                     (transaction_id, item[0], item[1], item[2]))
+    
+    # Save invoice details into the invoices table
+    items_details = ', '.join([f"{item[0]} (${item[1]})" for item in items_purchased])
+    conn.execute('INSERT INTO invoices (total, money_received, change, time, items) VALUES (?, ?, ?, ?, ?)',
+                 (total, money_received, change, purchase_time, items_details))
 
     conn.commit()
     conn.close()
     return render_template('transaction.html', total=total, change=change, purchase_time=purchase_time, items=items_purchased)
+
+@app.route('/invoices', methods=['GET'])
+def invoices():
+    conn = get_db_connection()
+    invoices = conn.execute('SELECT * FROM invoices ORDER BY time DESC').fetchall()
+    conn.close()
+    return render_template('invoices.html', invoices=invoices)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

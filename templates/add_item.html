@@ -5,49 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add/Edit Item</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: auto;
-            padding: 20px;
-            background-color: #f4f4f9;
-        }
-        h1 {
-            color: #d9534f;
-        }
-        form {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        label {
-            display: inline-block;
-            width: 100px;
-            font-weight: bold;
-        }
-        input[type="text"], input[type="number"], select {
-            width: calc(100% - 120px);
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            padding: 10px 15px;
-            background-color: #5bc0de;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
+        /* Your CSS styling */
     </style>
 </head>
 <body>
     <h1>Add/Edit Item</h1>
     <form action="/add_item" method="POST">
-        <input type="hidden" name="item_id" value="{{ item['id'] if item else '' }}"> <!-- Hidden input for item ID -->
+        <input type="hidden" name="item_id" value="{{ item['id'] if item else '' }}">
         
         <label for="name">Item Name:</label>
         <input type="text" id="name" name="name" value="{{ item['name'] if item else '' }}" required>

@@ -7,32 +7,53 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
+            max-width: 600px;
             margin: auto;
-            padding: 20px;
+            padding: 15px;
             background-color: #f4f4f9;
         }
         h1 {
             text-align: center;
             color: #d9534f;
+            font-size: 24px;
         }
         nav {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         nav a {
-            margin-right: 20px;
+            margin-right: 15px;
             text-decoration: none;
             color: #5bc0de;
         }
         .item-type {
-            margin-top: 20px;
-            padding: 10px;
+            margin-top: 10px;
+            padding: 8px;
             background-color: #e9ecef;
             border-radius: 5px;
         }
         #total, #change {
             font-weight: bold;
-            margin-top: 10px;
+            margin-top: 5px;
+        }
+        label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        input[type="number"] {
+            width: 80px;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 8px 12px;
+            background-color: #5bc0de;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #31b0d5;
         }
     </style>
     <script>
@@ -127,7 +148,7 @@
         
         <div id="total">Total: $0.00</div>
         
-        <label for="money_received">Money Received:</label>
+        <label for="money_received">Money:</label>
         <input type="number" step="0.01" id="money_received" name="money_received" oninput="calculateChange()">
         <div id="change">Change: $0.00</div>
 

@@ -117,7 +117,6 @@ def add_item():
         conn.close()
         return redirect(url_for('add_item'))
 
-    # Fetch and sort items for the Edit Items page
     items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
     conn.close()
     return render_template('add_item.html', items=items)
@@ -158,7 +157,6 @@ def make_transaction():
     conn.commit()
     conn.close()
     
-    # Redirect to index after making a transaction
     return redirect(url_for('index'))
 
 @app.route('/invoices', methods=['GET'])
@@ -174,8 +172,11 @@ def export_invoices():
     invoices = conn.execute('SELECT * FROM invoices ORDER BY time DESC').fetchall()
     conn.close()
 
-    # Create a CSV file
-    csv_file = '/tmp/invoices.csv'
+    # Create a CSV file with a filename based on the current date and time
+    current_time = datetime.now(pytz.timezone('Asia/Manila'))
+    filename = current_time.strftime('%Y-%m-%d_%H-%M-%S_invoices.csv')  # Create a filename
+    csv_file = f'/tmp/{filename}'
+
     with open(csv_file, mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(['ID', 'Date & Time', 'Total', 'Money Received', 'Change', 'Items Purchased'])
@@ -190,7 +191,7 @@ def export_invoices():
             ])
 
     # Send the file as a download
-    return send_file(csv_file, as_attachment=True, download_name='invoices.csv')
+    return send_file(csv_file, as_attachment=True, download_name=filename)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

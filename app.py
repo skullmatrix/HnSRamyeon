@@ -92,13 +92,13 @@ def initialize_database():
 # Initialize the database
 initialize_database()
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET'])
 def index():
     conn = get_db_connection()
     items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
     
     # Handle search functionality
-    search_query = request.form.get('search_query')
+    search_query = request.args.get('search_query')  # Use 'args' for GET request
     if search_query:
         items = [item for item in items if search_query.lower() in item['name'].lower()]
 

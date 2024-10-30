@@ -37,6 +37,16 @@
         .button:hover {
             background-color: #6a1b9a;
         }
+        .search-bar {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .search-bar input {
+            padding: 10px;
+            width: 80%;
+            border-radius: 5px;
+            border: 1px solid #8e24aa;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -77,7 +87,11 @@
         <a href="/export_inventory" class="button">Export Inventory</a> <!-- Export Inventory Button -->
     </div>
 
-    <table>
+    <div class="search-bar">
+        <input type="text" id="search_query" placeholder="Search for items..." oninput="filterItems()">
+    </div>
+
+    <table id="inventory_table">
         <tr>
             <th>Item Name</th>
             <th>Price</th>
@@ -86,7 +100,7 @@
             <th>Edit Quantity</th>
         </tr>
         {% for item in items %}
-        <tr>
+        <tr class="inventory-item">
             <td>{{ item['name'] }}</td>
             <td>₱{{ item['price'] }}</td>
             <td>{{ item['type'] }}</td>
@@ -101,5 +115,21 @@
         </tr>
         {% endfor %}
     </table>
+
+    <script>
+        function filterItems() {
+            const query = document.getElementById('search_query').value.toLowerCase();
+            const rows = document.querySelectorAll('.inventory-item');
+
+            rows.forEach(row => {
+                const itemName = row.cells[0].textContent.toLowerCase();
+                if (itemName.includes(query)) {
+                    row.style.display = ''; // Show row
+                } else {
+                    row.style.display = 'none'; // Hide row
+                }
+            });
+        }
+    </script>
 </body>
 </html>

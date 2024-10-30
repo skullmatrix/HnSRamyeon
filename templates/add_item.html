@@ -52,7 +52,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            width: auto;
+            width: auto; /* Set width to auto for the button */
         }
         .search-container {
             margin-top: 20px;
@@ -62,15 +62,15 @@
         }
         .item-entry {
             border-bottom: 1px solid #d1c4e9;
-            padding: 5px 0;
+            padding: 5px 0; /* Reduced padding for item entries */
         }
         .edit-button {
-            color: white;
-            background: #8e24aa;
-            border: none;
+            color: white; /* Text color */
+            background: #8e24aa; /* No background color */
+            border: none; /* No border */
             font-size: 14px;
             cursor: pointer;
-            width: fit-content;
+            width: fit-content; /* Fit the button to the text */
         }
     </style>
     <script>
@@ -80,7 +80,11 @@
 
             items.forEach(item => {
                 const itemName = item.querySelector('span').textContent.toLowerCase();
-                item.style.display = itemName.includes(searchInput) ? '' : 'none';
+                if (itemName.includes(searchInput)) {
+                    item.style.display = ''; // Show the item
+                } else {
+                    item.style.display = 'none'; // Hide the item
+                }
             });
         }
     </script>
@@ -89,7 +93,6 @@
     <a href="/" class="back-button">Back</a>
     <h1>Edit Items</h1>
 
-    <!-- Form for Adding/Editing Item -->
     <form action="/add_item" method="POST">
         <input type="hidden" name="item_id" value="{{ item['id'] if item else '' }}">
         
@@ -108,14 +111,10 @@
             <option value="Sweets" {% if item and item['type'] == 'Sweets' %}selected{% endif %}>Sweets</option>
             <option value="Drinks" {% if item and item['type'] == 'Drinks' %}selected{% endif %}>Drinks</option>
         </select>
-
-        <label for="quantity">Quantity:</label>
-        <input type="number" id="quantity" name="quantity" value="{{ item['quantity'] if item else '100' }}" required>
         
         <button type="submit">{{ 'Update Item' if item else 'Add Item' }}</button>
     </form>
 
-    <!-- Search and List of Existing Items -->
     <div class="search-container">
         <label for="search">Find Item:</label>
         <input type="text" id="search" onkeyup="filterItems()" placeholder="Search for items..." />
@@ -125,8 +124,8 @@
         <h3>Existing Items</h3>
         {% for item in items %}
             <div class="item-entry">
-                <span>{{ item['name'] }} - ₱{{ item['price'] }} - Qty: {{ item['quantity'] }}</span>
-                <form action="/add_item?item_id={{ item['id'] }}" method="GET" style="display: inline;">
+                <span>{{ item['name'] }} - ₱{{ item['price'] }}</span>
+                <form action="/edit_item/{{ item['id'] }}" method="GET" style="display: inline;">
                     <button class="edit-button" type="submit">Edit</button>
                 </form>
             </div>

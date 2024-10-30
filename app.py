@@ -110,14 +110,19 @@ def index():
 def add_item():
     conn = get_db_connection()
     if request.method == 'POST':
+        item_id = request.form.get('item_id')
         name = request.form['name']
         price = int(request.form['price'])
         type = request.form['type']
         quantity = int(request.form['quantity'])
 
-        # Insert new item
-        conn.execute('INSERT INTO items (name, price, type, quantity) VALUES (?, ?, ?, ?)', 
-                     (name, price, type, quantity))
+        if item_id:  # Edit existing item
+            conn.execute('UPDATE items SET name = ?, price = ?, type = ?, quantity = ? WHERE id = ?', 
+                         (name, price, type, quantity, item_id))
+        else:  # Add new item
+            conn.execute('INSERT INTO items (name, price, type, quantity) VALUES (?, ?, ?, ?)', 
+                         (name, price, type, quantity))
+        
         conn.commit()
         conn.close()
         return redirect(url_for('add_item'))
@@ -126,42 +131,13 @@ def add_item():
     conn.close()
     return render_template('add_item.html', items=items)
 
-@app.route('/make_transaction', methods=['POST'])
-def make_transaction():
-    item_ids = request.form.getlist('item_id')
-    quantities = request.form.getlist('quantity')
-    money_received = int(request.form['money_received'])
+@app.route('/edit_item/<int:item_id>', methods=['GET'])
+def edit_item(item_id):
     conn = get_db_connection()
-    total = 0
-    items_purchased = []
-
-    for i, item_id in enumerate(item_ids):
-        item = conn.execute('SELECT * FROM items WHERE id = ?', (item_id,)).fetchone()
-        quantity = int(quantities[i])
-        item_total = item['price'] * quantity
-        total += item_total
-        items_purchased.append((item['name'], item['price'], quantity, item_total))
-
-        # Deduct inventory quantity
-        new_quantity = item['quantity'] - quantity
-        if new_quantity < 0:
-            conn.close()
-            return f"Error: Insufficient stock for {item['name']}."
-        conn.execute('UPDATE items SET quantity = ? WHERE id = ?', (new_quantity, item_id))
-
-    change = max(0, money_received - total)
-
-    philippine_tz = pytz.timezone('Asia/Manila')
-    purchase_time = datetime.now(philippine_tz).strftime('%Y-%m-%d %H:%M:%S')
-
-    items_details = ', '.join([f"{name} (x{quantity}) P{item_total}" for name, price, quantity, item_total in items_purchased])
-    conn.execute('INSERT INTO invoices (total, money_received, change, time, items) VALUES (?, ?, ?, ?, ?)',
-                 (total, money_received, change, purchase_time, items_details))
-
-    conn.commit()
+    item = conn.execute('SELECT * FROM items WHERE id = ?', (item_id,)).fetchone()
+    items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
     conn.close()
-    
-    return redirect(url_for('index'))
+    return render_template('add_item.html', item=item, items=items)
 
 @app.route('/inventory', methods=['GET', 'POST'])
 def inventory():

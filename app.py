@@ -245,6 +245,7 @@ def export_inventory():
         output,
         mimetype="text/csv",
         headers={"Content-Disposition": "attachment;filename=inventory.csv"}
+    )
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

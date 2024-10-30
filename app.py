@@ -224,6 +224,27 @@ def export_invoices():
 
     # Send the file as a download
     return send_file(csv_file, as_attachment=True, download_name=filename)
+    
+@app.route('/export_inventory')
+def export_inventory():
+    conn = get_db_connection()
+    inventory = conn.execute('SELECT * FROM items').fetchall()
+    conn.close()
+
+    # Convert inventory to CSV format
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Item Name', 'Price', 'Type', 'Quantity'])
+    for item in inventory:
+        writer.writerow([item['name'], item['price'], item['type'], item['quantity']])
+    
+    output.seek(0)
+    
+    # Return CSV file as a download
+    return Response(
+        output,
+        mimetype="text/csv",
+        headers={"Content-Disposition": "attachment;filename=inventory.csv"}
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

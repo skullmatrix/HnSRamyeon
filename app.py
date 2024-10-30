@@ -198,15 +198,22 @@ def invoices():
     conn.close()
     return render_template('invoices.html', invoices=invoices)
 
-@app.route('/export_invoices', methods=['GET'])
+@app.route('/export_invoices')
 def export_invoices():
+    from_date = request.args.get('from')
+    to_date = request.args.get('to')
+
     conn = get_db_connection()
-    invoices = conn.execute('SELECT * FROM invoices ORDER BY time DESC').fetchall()
+    if from_date and to_date:
+        invoices = conn.execute('SELECT * FROM invoices WHERE date(time) BETWEEN ? AND ?', (from_date, to_date)).fetchall()
+    else:
+        invoices = conn.execute('SELECT * FROM invoices').fetchall()  # Fallback to all invoices
+
     conn.close()
 
-    # Create a CSV file with a filename based on the current date and time
+    # Create a CSV file as before
     current_time = datetime.now(pytz.timezone('Asia/Manila'))
-    filename = current_time.strftime('%Y-%m-%d_%H-%M-%S_invoices.csv')  # Create a filename
+    filename = current_time.strftime('%Y-%m-%d_%H-%M-%S_invoices.csv')
     csv_file = f'/tmp/{filename}'
 
     with open(csv_file, mode='w', newline='') as file:
@@ -219,12 +226,11 @@ def export_invoices():
                 invoice['total'], 
                 invoice['money_received'], 
                 invoice['change'], 
-                invoice['items'].replace('₱', 'P')  # Replace ₱ with P
+                invoice['items']
             ])
 
-    # Send the file as a download
     return send_file(csv_file, as_attachment=True, download_name=filename)
-    
+
 @app.route('/export_inventory')
 def export_inventory():
     conn = get_db_connection()

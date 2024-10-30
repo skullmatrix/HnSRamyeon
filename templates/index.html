@@ -165,9 +165,14 @@
         function adjustQuantity(itemId, itemPrice, delta) {
             const itemContainer = document.querySelector(`#review-section [data-id='${itemId}']`);
             let quantity = parseInt(itemContainer.getAttribute('data-quantity')) + delta;
-            if (quantity < 1) quantity = 1;
-            itemContainer.setAttribute('data-quantity', quantity);
-            document.getElementById(`quantity-${itemId}`).textContent = quantity;
+            
+            if (quantity <= 0) {
+                itemContainer.remove();
+            } else {
+                itemContainer.setAttribute('data-quantity', quantity);
+                document.getElementById(`quantity-${itemId}`).textContent = quantity;
+            }
+            
             calculateTotal();
         }
 
@@ -190,8 +195,16 @@
         }
 
         function validateForm(event) {
-            const moneyReceived = document.getElementById('money_received').value;
-            if (!moneyReceived || isNaN(moneyReceived) || Number(moneyReceived) <= 0) {
+            const total = parseFloat(document.getElementById('total').innerText.replace('Total: ₱', '')) || 0;
+            const moneyReceived = parseFloat(document.getElementById('money_received').value) || 0;
+
+            if (total <= 0) {
+                event.preventDefault();
+                alert("Please add at least one item to the transaction.");
+                return;
+            }
+
+            if (!moneyReceived || moneyReceived < total) {
                 event.preventDefault();
                 alert("Please enter a valid amount of money received.");
             }
@@ -212,7 +225,7 @@
     <nav>
         <a href="/add_item">Edit Items</a>
         <a href="/invoices">View Invoices</a>
-        <a href="/inventory">Inventory</a> <!-- New Inventory link -->
+        <a href="/inventory">Inventory</a>
     </nav>
 
     <div class="search-bar">

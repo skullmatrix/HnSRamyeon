@@ -1,214 +1,165 @@
 
-import os
-import csv
-from flask import Flask, request, render_template, redirect, url_for, send_file
 import sqlite3
+from flask import Flask, render_template, request, redirect, url_for
 from datetime import datetime
-import pytz
 
 app = Flask(__name__)
 
-# Database connection
-def get_db_connection():
-    conn = sqlite3.connect('pos_database.db')
-    conn.row_factory = sqlite3.Row
-    return conn
+# Ensure that you have the database setup code before this
+connection = sqlite3.connect("database.db")
+cursor = connection.cursor()
 
-# Initialize the database and add items if not present
-def initialize_database():
-    conn = get_db_connection()
-    conn.execute('''
+# Example setup: Ensure items table exists
+cursor.execute("""
     CREATE TABLE IF NOT EXISTS items (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        price INTEGER NOT NULL,
-        type TEXT NOT NULL,
-        quantity INTEGER NOT NULL DEFAULT 100
-    );
-    ''')
-    conn.execute('''
-    CREATE TABLE IF NOT EXISTS invoices (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        total INTEGER NOT NULL,
-        money_received INTEGER NOT NULL,
-        change INTEGER NOT NULL,
-        time TEXT NOT NULL,
-        items TEXT NOT NULL
-    );
-    ''')
-    conn.commit()
+        name TEXT,
+        price REAL,
+        type TEXT,
+        quantity INTEGER
+    )
+""")
+connection.commit()
 
-    # Populate items if the table is empty
-    cursor = conn.cursor()
-    cursor.execute("SELECT COUNT(*) FROM items")
-    if cursor.fetchone()[0] == 0:
-        items = [
-            ("Cheese Ramen Spicy", 99, "Soup Base", 100),
-            ("Nongshim", 89, "Soup Base", 100),
-            ("Ottogi Cheese Ramen", 99, "Soup Base", 100),
-            ("Nongshim JJWANG", 129, "Soup Base", 100),
-            ("SOON Ramen", 99, "Soup Base", 100),
-            ("JIN Ramen", 69, "Soup Base", 100),
-            ("Buldak 2X Spicy", 129, "Stir Fry", 100),
-            ("Buldak Black", 119, "Stir Fry", 100),
-            ("Buldak Carbonara", 109, "Stir Fry", 100),
-            ("Cheese Ramen Stir Fry", 109, "Stir Fry", 100),
-            ("JIN Ramen Cup", 63, "Cups", 100),
-            ("Nongshim Squid Jampong Cup", 55, "Cups", 100),
-            ("Paldo Pororo Cup", 59, "Cups", 100),
-            ("Shrimp Cup Ramen Small", 52, "Cups", 100),
-            ("Boiled Egg", 19, "Toppings", 100),
-            ("Crab Stick", 15, "Toppings", 100),
-            ("Fish Cake", 15, "Toppings", 100),
-            ("Fishball", 15, "Toppings", 100),
-            ("Golden Cheese Ball", 15, "Toppings", 100),
-            ("Ham", 15, "Toppings", 100),
-            ("Kimchi", 10, "Toppings", 100),
-            ("Lobster Ball", 19, "Toppings", 100),
-            ("Lobster Stick", 15, "Toppings", 100),
-            ("Lotte Luncheon Meat", 119, "Toppings", 100),
-            ("Namkwang Seaweed", 19, "Toppings", 100),
-            ("Raw Egg", 15, "Toppings", 100),
-            ("Sajo Gochujang", 76, "Toppings", 100),
-            ("Sanjo Doenjang", 68, "Toppings", 100),
-            ("Shabu2x Mix", 15, "Toppings", 100),
-            ("Sliced Cheese", 19, "Toppings", 100),
-            ("Ssamjang", 78, "Toppings", 100),
-            ("Almond Choco Ball", 69, "Sweets", 100),
-            ("Ice Cream Cone", 10, "Sweets", 100),
-            ("Pepero", 59, "Sweets", 100),
-            ("Binggrae Milk", 59, "Drinks", 100),
-            ("Caffee Latte Can", 49, "Drinks", 100),
-            ("Chupa Chups", 69, "Drinks", 100),
-            ("Flavored Yakult", 49, "Drinks", 100),
-            ("Ice Talk", 60, "Drinks", 100),
-            ("Jinro Soju", 110, "Drinks", 100),
-            ("Milkis", 49, "Drinks", 100),
-            ("Welch’s", 70, "Drinks", 100),
-            ("Yakult Orig", 39, "Drinks", 100),
-        ]
-        cursor.executemany('INSERT INTO items (name, price, type, quantity) VALUES (?, ?, ?, ?)', items)
-        conn.commit()
-    conn.close()
+# Check if items table is empty and insert default data if needed
+cursor.execute("SELECT COUNT(*) FROM items")
+if cursor.fetchone()[0] == 0:
+    items = [
+        ("Cheese Ramen Spicy", 99, "Soup Base", 5),
+        ("Nongshim", 89, "Soup Base", 5),
+        ("Ottogi Cheese Ramen", 99, "Soup Base", 5),
+        ("Nongshim JJWANG", 129, "Soup Base", 5),
+        ("SOON Ramen", 99, "Soup Base", 5),
+        ("JIN Ramen", 69, "Soup Base", 5),
+        ("Buldak 2X Spicy", 129, "Stir Fry", 5),
+        ("Buldak Black", 119, "Stir Fry", 5),
+        ("Buldak Carbonara", 109, "Stir Fry", 5),
+        ("Cheese Ramen Stir Fry", 109, "Stir Fry", 5),
+        ("JIN Ramen Cup", 63, "Cups", 5),
+        ("Nongshim Squid Jampong Cup", 55, "Cups", 5),
+        ("Paldo Pororo Cup", 59, "Cups", 5),
+        ("Shrimp Cup Ramen Small", 52, "Cups", 5),
+        ("Boiled Egg", 19, "Toppings", 5),
+        ("Crab Stick", 15, "Toppings", 5),
+        ("Fish Cake", 15, "Toppings", 5),
+        ("Fishball", 15, "Toppings", 5),
+        ("Golden Cheese Ball", 15, "Toppings", 5),
+        ("Ham", 15, "Toppings", 5),
+        ("Kimchi", 10, "Toppings", 5),
+        ("Lobster Ball", 19, "Toppings", 5),
+        ("Lobster Stick", 15, "Toppings", 5),
+        ("Lotte Luncheon Meat", 119, "Toppings", 5),
+        ("Namkwang Seaweed", 19, "Toppings", 5),
+        ("Raw Egg", 15, "Toppings", 5),
+        ("Sajo Gochujang", 76, "Toppings", 5),
+        ("Sanjo Doenjang", 68, "Toppings", 5),
+        ("Shabu2x Mix", 15, "Toppings", 5),
+        ("Sliced Cheese", 19, "Toppings", 5),
+        ("Ssamjang", 78, "Toppings", 5),
+        ("Almond Choco Ball", 69, "Sweets", 5),
+        ("Ice Cream Cone", 10, "Sweets", 5),
+        ("Pepero", 59, "Sweets", 5),
+        ("Binggrae Milk", 59, "Drinks", 5),
+        ("Caffee Latte Can", 49, "Drinks", 5),
+        ("Chupa Chups", 69, "Drinks", 5),
+        ("Flavored Yakult", 49, "Drinks", 5),
+        ("Ice Talk", 60, "Drinks", 5),
+        ("Jinro Soju", 110, "Drinks", 5),
+        ("Milkis", 49, "Drinks", 5),
+        ("Welch’s", 70, "Drinks", 5),
+        ("Yakult Orig", 39, "Drinks", 5),
+    ]
+    
+    cursor.executemany("INSERT INTO items (name, price, type, quantity) VALUES (?, ?, ?, ?)", items)
+    connection.commit()
 
-# Initialize the database
-initialize_database()
+connection.close()
+
+# In-memory data storage for simplicity
+items = [
+    {"id": 1, "name": "Noodles", "price": 50.0, "type": "Soup Base", "quantity": 100},
+    {"id": 2, "name": "Eggs", "price": 10.0, "type": "Toppings", "quantity": 50},
+    # Add more items here...
+]
+transactions = []
+
 
 @app.route('/')
 def index():
-    conn = get_db_connection()
-    items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
-    conn.close()
     return render_template('index.html', items=items)
 
-@app.route('/add_item', methods=['GET', 'POST'])
-def add_item():
-    conn = get_db_connection()
-    if request.method == 'POST':
-        item_id = request.form.get('item_id')
-        name = request.form['name']
-        price = int(request.form['price'])
-        type = request.form['type']
-        
-        if item_id:
-            conn.execute('UPDATE items SET name = ?, price = ?, type = ? WHERE id = ?', (name, price, type, item_id))
-        else:
-            conn.execute('INSERT INTO items (name, price, type) VALUES (?, ?, ?)', (name, price, type))
-        
-        conn.commit()
-        conn.close()
-        return redirect(url_for('add_item'))
 
-    items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
-    conn.close()
-    return render_template('add_item.html', items=items)
+@app.route('/make_transaction', methods=['POST'])
+def make_transaction():
+    # Parse transaction data
+    selected_items = request.form.getlist('item')
+    money_received = float(request.form['money_received'])
+    
+    items_purchased = []
+    total = 0
 
-@app.route('/edit_item/<int:item_id>', methods=['GET'])
-def edit_item(item_id):
-    conn = get_db_connection()
-    item = conn.execute('SELECT * FROM items WHERE id = ?', (item_id,)).fetchone()
-    items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
-    conn.close()
-    return render_template('add_item.html', item=item, items=items)
-@app.route('/inventory', methods=['GET', 'POST'])
+    for item_id in selected_items:
+        for item in items:
+            if item["id"] == int(item_id):
+                quantity = int(request.form[f'quantity_{item_id}'])
+                if quantity > item["quantity"]:
+                    return "Not enough stock", 400
+                item["quantity"] -= quantity
+                total += item["price"] * quantity
+                items_purchased.append({"name": item["name"], "quantity": quantity, "price": item["price"]})
+                break
+
+    # Record transaction
+    transaction = {
+        "id": len(transactions) + 1,
+        "date": datetime.now(),
+        "total": total,
+        "money_received": money_received,
+        "items_purchased": items_purchased,
+    }
+    transactions.append(transaction)
+
+    return redirect(url_for('invoices'))
+
+
+@app.route('/invoices')
+def invoices():
+    return render_template('invoices.html', transactions=transactions)
+
+
+@app.route('/inventory')
 def inventory():
-    conn = get_db_connection()
-    if request.method == 'POST':
-        item_id = request.form['item_id']
-        new_quantity = int(request.form['new_quantity'])
-        conn.execute('UPDATE items SET quantity = ? WHERE id = ?', (new_quantity, item_id))
-        conn.commit()
-    items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
-    conn.close()
     return render_template('inventory.html', items=items)
+
+
+@app.route('/add_item', methods=['POST'])
+def add_item():
+    item_id = int(request.form.get('item_id', 0))
+    name = request.form['name']
+    price = float(request.form['price'])
+    item_type = request.form['type']
+    quantity = int(request.form.get('quantity', 0))
+
+    # Update existing item
+    if item_id:
+        for item in items:
+            if item['id'] == item_id:
+                item['name'] = name
+                item['price'] = price
+                item['type'] = item_type
+                item['quantity'] = quantity
+                break
+    # Add new item
+    else:
+        items.append({
+            "id": len(items) + 1,
+            "name": name,
+            "price": price,
+            "type": item_type,
+            "quantity": quantity
+        })
+
+    return redirect(url_for('inventory'))
 
 if __name__ == '__main__':
     app.run(debug=True)
-    
-@app.route('/make_transaction', methods=['POST'])
-def make_transaction():
-    item_ids = request.form.getlist('item_id')
-    quantities = request.form.getlist('quantity')
-    money_received = int(request.form['money_received'])
-    conn = get_db_connection()
-    total = 0
-    items_purchased = []
-
-    for i, item_id in enumerate(item_ids):
-        item = conn.execute('SELECT * FROM items WHERE id = ?', (item_id,)).fetchone()
-        quantity = int(quantities[i])
-        item_total = item['price'] * quantity
-        total += item_total
-        items_purchased.append((item['name'], item['price'], quantity, item_total))
-
-    change = max(0, money_received - total)
-
-    philippine_tz = pytz.timezone('Asia/Manila')
-    purchase_time = datetime.now(philippine_tz).strftime('%Y-%m-%d %H:%M:%S')
-
-    items_details = ', '.join([f"{name} (x{quantity}) P{item_total}" for name, price, quantity, item_total in items_purchased])
-    conn.execute('INSERT INTO invoices (total, money_received, change, time, items) VALUES (?, ?, ?, ?, ?)',
-                 (total, money_received, change, purchase_time, items_details))
-
-    conn.commit()
-    conn.close()
-    
-    return redirect(url_for('index'))
-
-@app.route('/invoices', methods=['GET'])
-def invoices():
-    conn = get_db_connection()
-    invoices = conn.execute('SELECT * FROM invoices ORDER BY time DESC').fetchall()
-    conn.close()
-    return render_template('invoices.html', invoices=invoices)
-
-@app.route('/export_invoices', methods=['GET'])
-def export_invoices():
-    conn = get_db_connection()
-    invoices = conn.execute('SELECT * FROM invoices ORDER BY time DESC').fetchall()
-    conn.close()
-
-    # Create a CSV file with a filename based on the current date and time
-    current_time = datetime.now(pytz.timezone('Asia/Manila'))
-    filename = current_time.strftime('%Y-%m-%d_%H-%M-%S_invoices.csv')  # Create a filename
-    csv_file = f'/tmp/{filename}'
-
-    with open(csv_file, mode='w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(['ID', 'Date & Time', 'Total', 'Money Received', 'Change', 'Items Purchased'])
-        for invoice in invoices:
-            writer.writerow([
-                invoice['id'], 
-                invoice['time'], 
-                invoice['total'], 
-                invoice['money_received'], 
-                invoice['change'], 
-                invoice['items'].replace('₱', 'P')  # Replace ₱ with P
-            ])
-
-    # Send the file as a download
-    return send_file(csv_file, as_attachment=True, download_name=filename)
-
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)

@@ -18,7 +18,7 @@
             color: #6a1b9a;
         }
         .nav {
-            text-align: right; /* Align the button to the right */
+            text-align: right;
             margin-bottom: 20px;
         }
         .nav a {
@@ -48,12 +48,6 @@
             background-color: #8e24aa;
             color: white;
         }
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-        tr:hover {
-            background-color: #ddd;
-        }
         .filter-container {
             margin-bottom: 20px;
         }
@@ -64,19 +58,32 @@
             padding: 8px;
             margin-left: 10px;
         }
+        .button {
+            padding: 10px 15px;
+            background-color: #6a1b9a;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #4a148c;
+        }
     </style>
 </head>
 <body>
     <h1>Invoices</h1>
-    
+
     <div class="nav">
         <a href="/">Back</a>
-        <a href="/export_invoices" id="export-link">Export Invoices</a> <!-- Link to export invoices -->
+        <button class="button" onclick="exportInvoices()">Export Selected Dates</button>
     </div>
 
     <div class="filter-container">
-        <label for="filter-date">Filter by Date:</label>
-        <input type="date" id="filter-date" onchange="filterInvoices()">
+        <label for="from-date">From:</label>
+        <input type="date" id="from-date" onchange="filterInvoices()">
+        <label for="to-date">To:</label>
+        <input type="date" id="to-date" onchange="filterInvoices()">
     </div>
 
     <table id="invoices-table">
@@ -89,7 +96,7 @@
             <th>Items Purchased</th>
         </tr>
         {% for invoice in invoices %}
-        <tr>
+        <tr class="invoice-row" data-date="{{ invoice['time'] }}">
             <td>{{ invoice['id'] }}</td>
             <td>{{ invoice['time'] }}</td>
             <td>₱{{ invoice['total'] }}</td>
@@ -102,18 +109,26 @@
 
     <script>
         function filterInvoices() {
-            const filterDate = document.getElementById('filter-date').value;
-            const table = document.getElementById('invoices-table');
-            const rows = table.getElementsByTagName('tr');
+            const fromDate = document.getElementById('from-date').value;
+            const toDate = document.getElementById('to-date').value;
+            const rows = document.querySelectorAll('.invoice-row');
 
-            for (let i = 1; i < rows.length; i++) {
-                const dateCell = rows[i].cells[1].innerText.split(' ')[0]; // Get only the date part
-                if (filterDate === '' || dateCell === filterDate) {
-                    rows[i].style.display = ''; // Show the row
+            rows.forEach(row => {
+                const date = row.getAttribute('data-date').split(' ')[0]; // Get only the date part
+                if ((fromDate && date < fromDate) || (toDate && date > toDate)) {
+                    row.style.display = 'none'; // Hide the row
                 } else {
-                    rows[i].style.display = 'none'; // Hide the row
+                    row.style.display = ''; // Show the row
                 }
-            }
+            });
+        }
+
+        function exportInvoices() {
+            const fromDate = document.getElementById('from-date').value;
+            const toDate = document.getElementById('to-date').value;
+
+            // Redirect to the export endpoint with date parameters
+            window.location.href = `/export_invoices?from=${fromDate}&to=${toDate}`;
         }
     </script>
 </body>

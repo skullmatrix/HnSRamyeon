@@ -152,16 +152,22 @@ def add_item():
             conn.execute('UPDATE items SET name = ?, price = ?, type = ? WHERE id = ?', (name, price, type, item_id))
         else:
             conn.execute('INSERT INTO items (name, price, type) VALUES (?, ?, ?)', (name, price, type))
-    
-    # Check for GET request with item_id for edit functionality
-    elif request.method == 'GET' and request.args.get('item_id'):
-        item_id = request.args.get('item_id')
-        item = conn.execute('SELECT * FROM items WHERE id = ?', (item_id,)).fetchone()
-    
+        
+        conn.commit()
+        conn.close()
+        return redirect(url_for('add_item'))
+
     items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
     conn.close()
-    return render_template('add_item.html', items=items, item=item)
+    return render_template('add_item.html', items=items)
 
+@app.route('/edit_item/<int:item_id>', methods=['GET'])
+def edit_item(item_id):
+    conn = get_db_connection()
+    item = conn.execute('SELECT * FROM items WHERE id = ?', (item_id,)).fetchone()
+    items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
+    conn.close()
+    return render_template('add_item.html', item=item, items=items)
 @app.route('/inventory', methods=['GET', 'POST'])
 def inventory():
     conn = get_db_connection()

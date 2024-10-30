@@ -144,10 +144,6 @@ def inventory():
 
 if __name__ == '__main__':
     app.run(debug=True)
-    
-from datetime import datetime
-import pytz
-from flask import request, redirect, url_for
 
 @app.route('/make_transaction', methods=['POST'])
 def make_transaction():
@@ -161,6 +157,12 @@ def make_transaction():
     # Calculate total and build items purchased details
     for i, item_id in enumerate(item_ids):
         item = conn.execute('SELECT * FROM items WHERE id = ?', (item_id,)).fetchone()
+        
+        # Ensure the item was fetched successfully
+        if item is None:
+            print(f"Error: Item with ID {item_id} not found in database.")
+            continue  # Skip this item if not found
+
         quantity = int(quantities[i])
         item_total = item['price'] * quantity
         total += item_total

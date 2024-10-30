@@ -1,7 +1,7 @@
 
 import os
 import csv
-from flask import Flask, request, render_template, redirect, url_for, send_file
+from flask import Flask, request, render_template, redirect, url_for, send_file, Response
 import sqlite3
 from datetime import datetime
 import pytz
@@ -225,22 +225,22 @@ def export_invoices():
     # Send the file as a download
     return send_file(csv_file, as_attachment=True, download_name=filename)
     
+
 @app.route('/export_inventory')
 def export_inventory():
     conn = get_db_connection()
     inventory = conn.execute('SELECT * FROM items').fetchall()
     conn.close()
 
-    # Convert inventory to CSV format
+    # Create CSV output
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(['Item Name', 'Price', 'Type', 'Quantity'])
+    writer.writerow(['Item Name', 'Price', 'Type', 'Quantity'])  # Header
     for item in inventory:
         writer.writerow([item['name'], item['price'], item['type'], item['quantity']])
     
     output.seek(0)
-    
-    # Return CSV file as a download
+
     return Response(
         output,
         mimetype="text/csv",

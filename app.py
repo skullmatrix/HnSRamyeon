@@ -101,36 +101,6 @@ def index():
     conn.close()
     return render_template('index.html', items=items)
 
-@app.route('/make_transaction', methods=['POST'])
-def make_transaction():
-    item_ids = request.form.getlist('item_id')
-    quantities = request.form.getlist('quantity')
-    money_received = int(request.form['money_received'])
-    conn = get_db_connection()
-    total = 0
-    items_purchased = []
-
-    for i, item_id in enumerate(item_ids):
-        item = conn.execute('SELECT * FROM items WHERE id = ?', (item_id,)).fetchone()
-        quantity = int(quantities[i])
-        item_total = item['price'] * quantity
-        total += item_total
-        items_purchased.append((item['name'], item['price'], quantity, item_total))
-
-    change = max(0, money_received - total)
-
-    philippine_tz = pytz.timezone('Asia/Manila')
-    purchase_time = datetime.now(philippine_tz).strftime('%Y-%m-%d %H:%M:%S')
-
-    items_details = ', '.join([f"{name} (x{quantity}) P{item_total}" for name, price, quantity, item_total in items_purchased])
-    conn.execute('INSERT INTO invoices (total, money_received, change, time, items) VALUES (?, ?, ?, ?, ?)',
-                 (total, money_received, change, purchase_time, items_details))
-
-    conn.commit()
-    conn.close()
-    
-    return redirect(url_for('index'))
-
 @app.route('/add_item', methods=['GET', 'POST'])
 def add_item():
     conn = get_db_connection()
@@ -172,6 +142,39 @@ def inventory():
     conn.close()
     return render_template('inventory.html', items=items)
 
+if __name__ == '__main__':
+    app.run(debug=True)
+    
+@app.route('/make_transaction', methods=['POST'])
+def make_transaction():
+    item_ids = request.form.getlist('item_id')
+    quantities = request.form.getlist('quantity')
+    money_received = int(request.form['money_received'])
+    conn = get_db_connection()
+    total = 0
+    items_purchased = []
+
+    for i, item_id in enumerate(item_ids):
+        item = conn.execute('SELECT * FROM items WHERE id = ?', (item_id,)).fetchone()
+        quantity = int(quantities[i])
+        item_total = item['price'] * quantity
+        total += item_total
+        items_purchased.append((item['name'], item['price'], quantity, item_total))
+
+    change = max(0, money_received - total)
+
+    philippine_tz = pytz.timezone('Asia/Manila')
+    purchase_time = datetime.now(philippine_tz).strftime('%Y-%m-%d %H:%M:%S')
+
+    items_details = ', '.join([f"{name} (x{quantity}) P{item_total}" for name, price, quantity, item_total in items_purchased])
+    conn.execute('INSERT INTO invoices (total, money_received, change, time, items) VALUES (?, ?, ?, ?, ?)',
+                 (total, money_received, change, purchase_time, items_details))
+
+    conn.commit()
+    conn.close()
+    
+    return redirect(url_for('index'))
+
 @app.route('/invoices', methods=['GET'])
 def invoices():
     conn = get_db_connection()
@@ -179,5 +182,33 @@ def invoices():
     conn.close()
     return render_template('invoices.html', invoices=invoices)
 
+@app.route('/export_invoices', methods=['GET'])
+def export_invoices():
+    conn = get_db_connection()
+    invoices = conn.execute('SELECT * FROM invoices ORDER BY time DESC').fetchall()
+    conn.close()
+
+    # Create a CSV file with a filename based on the current date and time
+    current_time = datetime.now(pytz.timezone('Asia/Manila'))
+    filename = current_time.strftime('%Y-%m-%d_%H-%M-%S_invoices.csv')  # Create a filename
+    csv_file = f'/tmp/{filename}'
+
+    with open(csv_file, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['ID', 'Date & Time', 'Total', 'Money Received', 'Change', 'Items Purchased'])
+        for invoice in invoices:
+            writer.writerow([
+                invoice['id'], 
+                invoice['time'], 
+                invoice['total'], 
+                invoice['money_received'], 
+                invoice['change'], 
+                invoice['items'].replace('₱', 'P')  # Replace ₱ with P
+            ])
+
+    # Send the file as a download
+    return send_file(csv_file, as_attachment=True, download_name=filename)
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)

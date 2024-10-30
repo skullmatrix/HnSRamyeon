@@ -142,7 +142,7 @@ def make_transaction():
 @app.route('/add_item', methods=['GET', 'POST'])
 def add_item():
     conn = get_db_connection()
-    item = None
+    item = None  # Initialize item as None for add functionality
 
     if request.method == 'POST':
         item_id = request.form.get('item_id')
@@ -151,16 +151,18 @@ def add_item():
         type = request.form['type']
         quantity = int(request.form.get('quantity', 100))
 
-        if item_id:
+        if item_id:  # Update if item_id exists
             conn.execute('UPDATE items SET name = ?, price = ?, type = ?, quantity = ? WHERE id = ?', 
                          (name, price, type, quantity, item_id))
-        else:
+        else:  # Add new item if item_id does not exist
             conn.execute('INSERT INTO items (name, price, type, quantity) VALUES (?, ?, ?, ?)', 
                          (name, price, type, quantity))
         
         conn.commit()
         conn.close()
         return redirect(url_for('add_item'))
+    
+    # Check for GET request with item_id for edit functionality
     elif request.method == 'GET' and request.args.get('item_id'):
         item_id = request.args.get('item_id')
         item = conn.execute('SELECT * FROM items WHERE id = ?', (item_id,)).fetchone()

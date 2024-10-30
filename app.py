@@ -103,11 +103,9 @@ def index():
 
 @app.route('/make_transaction', methods=['POST'])
 def make_transaction():
-    # Collecting data from form
-    item_ids = request.form.getlist('item_id[]')
-    quantities = request.form.getlist('quantity[]')
+    item_ids = request.form.getlist('item_id')
+    quantities = request.form.getlist('quantity')
     money_received = int(request.form['money_received'])
-
     conn = get_db_connection()
     total = 0
     items_purchased = []
@@ -117,26 +115,20 @@ def make_transaction():
         quantity = int(quantities[i])
         item_total = item['price'] * quantity
         total += item_total
-        items_purchased.append(f"{item['name']} (x{quantity}) ₱{item_total}")
+        items_purchased.append((item['name'], item['price'], quantity, item_total))
 
-        # Deduct purchased quantity from inventory
-        new_quantity = item['quantity'] - quantity
-        conn.execute('UPDATE items SET quantity = ? WHERE id = ?', (new_quantity, item_id))
-
-    # Calculating change
     change = max(0, money_received - total)
 
-    # Formatting purchased items for storage
-    items_details = ', '.join(items_purchased)
-    
-    # Storing transaction in the invoices table
     philippine_tz = pytz.timezone('Asia/Manila')
     purchase_time = datetime.now(philippine_tz).strftime('%Y-%m-%d %H:%M:%S')
+
+    items_details = ', '.join([f"{name} (x{quantity}) P{item_total}" for name, price, quantity, item_total in items_purchased])
     conn.execute('INSERT INTO invoices (total, money_received, change, time, items) VALUES (?, ?, ?, ?, ?)',
                  (total, money_received, change, purchase_time, items_details))
+
     conn.commit()
     conn.close()
-
+    
     return redirect(url_for('index'))
 
 @app.route('/add_item', methods=['GET', 'POST'])

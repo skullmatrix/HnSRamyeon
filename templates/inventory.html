@@ -18,10 +18,79 @@
             color: #6a1b9a;
             font-size: 32px;
         }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4a148c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+        }
+        .button:hover {
+            background-color: #6a1b9a;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background-color: #8e24aa;
+            color: white;
+        }
+        .edit-form input[type="number"] {
+            width: 60px;
+            padding: 5px;
+            text-align: center;
+        }
+        .edit-form button {
+            padding: 5px 10px;
+            background-color: #4a148c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .edit-form button:hover {
+            background-color: #6a1b9a;
+        }
+        .item-button-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .item-button {
+            width: 180px;
+            height: 60px;
+            font-size: 16px;
+            background-color: #8e24aa;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .item-button:hover {
+            background-color: #7b1fa2;
         }
     </style>
 </head>
@@ -57,5 +126,15 @@
         </tr>
         {% endfor %}
     </table>
+
+    <!-- Aligned Item Buttons for Example (Add below table or in desired position) -->
+    <div class="item-button-container">
+        <!-- Example Buttons -->
+        <button class="item-button">Item 1</button>
+        <button class="item-button">Item 2</button>
+        <button class="item-button">Item 3</button>
+        <button class="item-button">Item 4</button>
+        <button class="item-button">Item 5</button>
+    </div>
 </body>
 </html>

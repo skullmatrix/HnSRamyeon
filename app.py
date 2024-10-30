@@ -22,7 +22,7 @@ def initialize_database():
         name TEXT NOT NULL,
         price INTEGER NOT NULL,
         type TEXT NOT NULL,
-        quantity INTEGER NOT NULL DEFAULT 100  -- Default inventory quantity
+        quantity INTEGER NOT NULL DEFAULT 100
     );
     ''')
     conn.execute('''
@@ -97,14 +97,40 @@ initialize_database()
 def index():
     conn = get_db_connection()
     items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
-    
-    # Handle search functionality
-    search_query = request.args.get('search_query')
-    if search_query:
-        items = [item for item in items if search_query.lower() in item['name'].lower()]
-
     conn.close()
     return render_template('index.html', items=items)
+
+@app.route('/invoices', methods=['GET'])
+def invoices():
+    conn = get_db_connection()
+    invoices = conn.execute('SELECT * FROM invoices ORDER BY time DESC').fetchall()
+    conn.close()
+    return render_template('invoices.html', invoices=invoices)
+
+@app.route('/export_invoices', methods=['GET'])
+def export_invoices():
+    conn = get_db_connection()
+    invoices = conn.execute('SELECT * FROM invoices ORDER BY time DESC').fetchall()
+    conn.close()
+
+    current_time = datetime.now(pytz.timezone('Asia/Manila'))
+    filename = current_time.strftime('%Y-%m-%d_%H-%M-%S_invoices.csv')
+    csv_file = f'/tmp/{filename}'
+
+    with open(csv_file, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['ID', 'Date & Time', 'Total', 'Money Received', 'Change', 'Items Purchased'])
+        for invoice in invoices:
+            writer.writerow([
+                invoice['id'],
+                invoice['time'],
+                invoice['total'],
+                invoice['money_received'],
+                invoice['change'],
+                invoice['items']
+            ])
+
+    return send_file(csv_file, as_attachment=True, download_name=filename)
 
 @app.route('/add_item', methods=['GET', 'POST'])
 def add_item():
@@ -114,12 +140,12 @@ def add_item():
         name = request.form['name']
         price = int(request.form['price'])
         type = request.form['type']
-        quantity = int(request.form.get('quantity', 100))  # Optional quantity for adding new items
+        quantity = int(request.form.get('quantity', 100))
 
-        if item_id:  # Edit existing item
+        if item_id:
             conn.execute('UPDATE items SET name = ?, price = ?, type = ?, quantity = ? WHERE id = ?', 
                          (name, price, type, quantity, item_id))
-        else:  # Add new item
+        else:
             conn.execute('INSERT INTO items (name, price, type, quantity) VALUES (?, ?, ?, ?)', 
                          (name, price, type, quantity))
         
@@ -139,39 +165,5 @@ def edit_item(item_id):
     conn.close()
     return render_template('edit_item.html', item=item, items=items)
 
-@app.route('/inventory', methods=['GET', 'POST'])
-def inventory():
-    conn = get_db_connection()
-    if request.method == 'POST':
-        item_id = request.form['item_id']
-        new_quantity = int(request.form['new_quantity'])
-        conn.execute('UPDATE items SET quantity = ? WHERE id = ?', (new_quantity, item_id))
-        conn.commit()
-    items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
-    conn.close()
-    return render_template('inventory.html', items=items)
-
-@app.route('/export_inventory', methods=['GET'])
-def export_inventory():
-    conn = get_db_connection()
-    items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
-    conn.close()
-
-    # Create a CSV file with a filename based on the current date and time
-    current_time = datetime.now(pytz.timezone('Asia/Manila'))
-    filename = current_time.strftime('%Y-%m-%d_%H-%M-%S_inventory.csv')
-    csv_file = f'/tmp/{filename}'
-
-    # Write inventory data to CSV file
-    with open(csv_file, mode='w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(['ID', 'Name', 'Price', 'Type', 'Quantity'])
-        for item in items:
-            writer.writerow([item['id'], item['name'], item['price'], item['type'], item['quantity']])
-
-    # Send the file as a download
-    return send_file(csv_file, as_attachment=True, download_name=filename)
-
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(debug=True)

@@ -34,6 +34,16 @@
         nav a:hover {
             background-color: #7b1fa2;
         }
+        .search-bar {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .search-bar input {
+            padding: 10px;
+            width: 80%;
+            border-radius: 5px;
+            border: 1px solid #8e24aa;
+        }
         .item-type {
             margin-top: 10px;
             padding: 8px;
@@ -44,6 +54,21 @@
             color: #4a148c;
             font-size: 18px;
             margin: 0;
+        }
+        .item-button {
+            display: inline-block;
+            width: 120px;
+            padding: 10px;
+            margin: 5px;
+            background-color: #8e24aa;
+            color: white;
+            border: none;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .item-button:hover {
+            background-color: #7b1fa2;
         }
         #review-section {
             background-color: #e0e0e0;
@@ -64,40 +89,37 @@
         }
     </style>
     <script>
-        function updateReview() {
+        function updateReview(itemId, itemName, itemPrice) {
             const reviewSection = document.getElementById('review-section');
-            reviewSection.innerHTML = '';
-            let total = 0;
-
-            document.querySelectorAll('.item-row').forEach(row => {
-                const checkbox = row.querySelector('input[type="checkbox"]');
-                if (checkbox.checked) {
-                    const price = parseFloat(checkbox.getAttribute('data-price'));
-                    const quantitySelect = document.createElement('select');
-                    quantitySelect.name = 'quantity';
-                    quantitySelect.onchange = calculateTotal;
-
-                    for (let i = 1; i <= 10; i++) { // Dropdown for quantities from 1 to 10
-                        const option = document.createElement('option');
-                        option.value = i;
-                        option.text = i;
-                        quantitySelect.appendChild(option);
-                    }
-
-                    const quantityContainer = document.createElement('div');
-                    quantityContainer.textContent = `${checkbox.dataset.name}: ₱${price} `;
-                    quantityContainer.appendChild(quantitySelect);
-                    reviewSection.appendChild(quantityContainer);
+            const existingItem = document.querySelector(`#review-section [data-id='${itemId}']`);
+            
+            if (!existingItem) {
+                const itemContainer = document.createElement('div');
+                itemContainer.setAttribute('data-id', itemId);
+                itemContainer.textContent = `${itemName}: ₱${itemPrice} `;
+                
+                const quantitySelect = document.createElement('select');
+                quantitySelect.name = 'quantity';
+                quantitySelect.onchange = calculateTotal;
+                for (let i = 1; i <= 10; i++) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.text = i;
+                    quantitySelect.appendChild(option);
                 }
-            });
+
+                itemContainer.appendChild(quantitySelect);
+                reviewSection.appendChild(itemContainer);
+            }
             calculateTotal();
         }
 
         function calculateTotal() {
             let total = 0;
-            document.querySelectorAll('#review-section select').forEach(select => {
-                const price = parseFloat(select.parentElement.textContent.split('₱')[1]);
-                total += price * (parseInt(select.value) || 1);
+            document.querySelectorAll('#review-section div').forEach(itemContainer => {
+                const itemPrice = parseFloat(itemContainer.textContent.split('₱')[1]);
+                const quantity = itemContainer.querySelector('select').value || 1;
+                total += itemPrice * quantity;
             });
             document.getElementById('total').innerText = 'Total: ₱' + total.toFixed(2);
             calculateChange();
@@ -113,9 +135,17 @@
         function validateForm(event) {
             const moneyReceived = document.getElementById('money_received').value;
             if (!moneyReceived || isNaN(moneyReceived) || Number(moneyReceived) <= 0) {
-                event.preventDefault(); // Prevent form submission
+                event.preventDefault();
                 alert("Please enter a valid amount of money received.");
             }
+        }
+
+        function filterItems() {
+            const query = document.getElementById('search_query').value.toLowerCase();
+            document.querySelectorAll('.item-button').forEach(button => {
+                const itemName = button.getAttribute('data-name').toLowerCase();
+                button.style.display = itemName.includes(query) ? 'inline-block' : 'none';
+            });
         }
     </script>
 </head>
@@ -127,22 +157,27 @@
         <a href="/invoices">View Invoices</a>
     </nav>
 
+    <div class="search-bar">
+        <form method="GET" action="/">
+            <input type="text" id="search_query" name="search_query" placeholder="Search for items..." oninput="filterItems()">
+        </form>
+    </div>
+
     <h2>Available Items</h2>
 
     <form action="/make_transaction" method="POST" onsubmit="validateForm(event)">
         {% for type in ['Soup Base', 'Stir Fry', 'Cups', 'Toppings', 'Sweets', 'Drinks'] %}
         <div class="item-type">
             <h3>{{ type }}</h3>
-            <ul>
+            <div>
                 {% for item in items %}
                 {% if item['type'] == type %}
-                <li class="item-row">
-                    <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-name="{{ item['name'] }}" data-price="{{ item['price'] }}" onchange="updateReview()">
+                <button type="button" class="item-button" data-name="{{ item['name'] }}" data-price="{{ item['price'] }}" onclick="updateReview('{{ item['id'] }}', '{{ item['name'] }}', {{ item['price'] }})">
                     {{ item['name'] }}: ₱{{ item['price'] }}
-                </li>
+                </button>
                 {% endif %}
                 {% endfor %}
-            </ul>
+            </div>
         </div>
         {% endfor %}
 

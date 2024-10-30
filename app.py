@@ -119,6 +119,10 @@ def make_transaction():
         total += item_total
         items_purchased.append(f"{item['name']} (x{quantity}) ₱{item_total}")
 
+        # Deduct purchased quantity from inventory
+        new_quantity = item['quantity'] - quantity
+        conn.execute('UPDATE items SET quantity = ? WHERE id = ?', (new_quantity, item_id))
+
     # Calculating change
     change = max(0, money_received - total)
 

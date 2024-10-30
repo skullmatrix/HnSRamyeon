@@ -52,7 +52,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            width: auto; /* Set width to auto for the button */
+            width: auto;
         }
         .search-container {
             margin-top: 20px;
@@ -62,32 +62,17 @@
         }
         .item-entry {
             border-bottom: 1px solid #d1c4e9;
-            padding: 5px 0; /* Reduced padding for item entries */
+            padding: 5px 0;
         }
         .edit-button {
-            color: white; /* Text color */
-            background: #8e24aa; /* No background color */
-            border: none; /* No border */
+            color: white;
+            background: #8e24aa;
+            border: none;
             font-size: 14px;
             cursor: pointer;
-            width: fit-content; /* Fit the button to the text */
+            width: fit-content;
         }
     </style>
-    <script>
-        function filterItems() {
-            const searchInput = document.getElementById('search').value.toLowerCase();
-            const items = document.querySelectorAll('.item-entry');
-
-            items.forEach(item => {
-                const itemName = item.querySelector('span').textContent.toLowerCase();
-                if (itemName.includes(searchInput)) {
-                    item.style.display = ''; // Show the item
-                } else {
-                    item.style.display = 'none'; // Hide the item
-                }
-            });
-        }
-    </script>
 </head>
 <body>
     <a href="/" class="back-button">Back</a>

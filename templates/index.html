@@ -57,8 +57,8 @@
         }
         .item-button {
             display: inline-block;
-            width: 150px;
-            height: 50px;
+            width: 180px; /* Make buttons larger */
+            height: 60px; /* Make buttons larger */
             padding: 10px;
             margin: 5px;
             font-size: 16px;
@@ -109,9 +109,15 @@
     <script>
         function updateReview(itemId, itemName, itemPrice) {
             const reviewSection = document.getElementById('review-section');
-            const existingItem = document.querySelector(`#review-section [data-id='${itemId}']`);
+            let existingItem = document.querySelector(`#review-section [data-id='${itemId}']`);
             
-            if (!existingItem) {
+            if (existingItem) {
+                // If item already exists, increase quantity
+                let quantity = parseInt(existingItem.getAttribute('data-quantity')) + 1;
+                existingItem.setAttribute('data-quantity', quantity);
+                document.getElementById(`quantity-${itemId}`).textContent = quantity;
+            } else {
+                // If item doesn't exist, create a new entry
                 const itemContainer = document.createElement('div');
                 itemContainer.setAttribute('data-id', itemId);
                 itemContainer.classList.add('quantity-control');
@@ -126,6 +132,7 @@
                 itemContainer.setAttribute('data-price', itemPrice);
                 itemContainer.setAttribute('data-quantity', 1);
                 
+                // Append in the order added
                 reviewSection.appendChild(itemContainer);
             }
             calculateTotal();

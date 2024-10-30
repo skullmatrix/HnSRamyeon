@@ -58,7 +58,8 @@
         .item-button {
             display: inline-block;
             width: 150px;
-            padding: 15px;
+            height: 50px;
+            padding: 10px;
             margin: 5px;
             font-size: 16px;
             background-color: #8e24aa;
@@ -80,6 +81,11 @@
         .quantity-control {
             display: flex;
             align-items: center;
+            justify-content: space-between;
+            padding: 5px 0;
+        }
+        .quantity-buttons {
+            display: flex;
             gap: 10px;
         }
         .quantity-button {
@@ -110,10 +116,12 @@
                 itemContainer.setAttribute('data-id', itemId);
                 itemContainer.classList.add('quantity-control');
                 itemContainer.innerHTML = `
-                    ${itemName}: ₱${itemPrice}
-                    <button class="quantity-button" onclick="adjustQuantity('${itemId}', ${itemPrice}, -1)">-</button>
-                    <span id="quantity-${itemId}">1</span>
-                    <button class="quantity-button" onclick="adjustQuantity('${itemId}', ${itemPrice}, 1)">+</button>
+                    <span>${itemName}: ₱${itemPrice}</span>
+                    <div class="quantity-buttons">
+                        <button type="button" class="quantity-button" onclick="adjustQuantity('${itemId}', ${itemPrice}, -1)">-</button>
+                        <span id="quantity-${itemId}">1</span>
+                        <button type="button" class="quantity-button" onclick="adjustQuantity('${itemId}', ${itemPrice}, 1)">+</button>
+                    </div>
                 `;
                 itemContainer.setAttribute('data-price', itemPrice);
                 itemContainer.setAttribute('data-quantity', 1);

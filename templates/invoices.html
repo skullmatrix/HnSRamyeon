@@ -21,16 +21,17 @@
             text-align: right;
             margin-bottom: 20px;
         }
-        .nav a {
+        .nav a, .button {
             padding: 10px 15px;
-            background-color: #5bc0de;
+            background-color: #6a1b9a; /* Updated to match the export button */
             color: white;
             text-decoration: none;
             border-radius: 5px;
             font-weight: bold;
+            margin-left: 10px; /* Add some spacing between buttons */
         }
-        .nav a:hover {
-            background-color: #31b0d5;
+        .nav a:hover, .button:hover {
+            background-color: #4a148c;
         }
         table {
             width: 100%;
@@ -53,21 +54,15 @@
         }
         .filter-container label {
             font-weight: bold;
+            color: black; /* Black text color for labels */
         }
         .filter-container input {
             padding: 8px;
             margin-left: 10px;
-        }
-        .button {
-            padding: 10px 15px;
-            background-color: #6a1b9a;
-            color: white;
-            border: none;
+            background-color: white; /* White background for inputs */
+            color: black; /* Black text color for inputs */
+            border: 1px solid #8e24aa;
             border-radius: 5px;
-            cursor: pointer;
-        }
-        .button:hover {
-            background-color: #4a148c;
         }
     </style>
 </head>
@@ -75,8 +70,8 @@
     <h1>Invoices</h1>
 
     <div class="nav">
-        <a href="/">Back</a>
-        <button class="button" onclick="exportInvoices()">Export Selected Dates</button>
+        <a href="/" class="button">Back</a>
+        <button class="button" onclick="exportInvoices()">Export</button> <!-- Changed to "Export" -->
     </div>
 
     <div class="filter-container">

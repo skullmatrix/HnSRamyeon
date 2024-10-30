@@ -142,6 +142,8 @@ def make_transaction():
 @app.route('/add_item', methods=['GET', 'POST'])
 def add_item():
     conn = get_db_connection()
+    item = None
+
     if request.method == 'POST':
         item_id = request.form.get('item_id')
         name = request.form['name']
@@ -159,10 +161,13 @@ def add_item():
         conn.commit()
         conn.close()
         return redirect(url_for('add_item'))
-
+    elif request.method == 'GET' and request.args.get('item_id'):
+        item_id = request.args.get('item_id')
+        item = conn.execute('SELECT * FROM items WHERE id = ?', (item_id,)).fetchone()
+    
     items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
     conn.close()
-    return render_template('add_item.html', items=items)
+    return render_template('add_item.html', items=items, item=item)
 
 @app.route('/inventory', methods=['GET', 'POST'])
 def inventory():

@@ -7,114 +7,56 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            background-color: #f3e5f5;
+            color: #4a148c;
             max-width: 800px;
             margin: auto;
             padding: 20px;
-            background-color: #f3e5f5;
-            color: #4a148c;
         }
         h1 {
             text-align: center;
+            font-size: 32px;
             color: #6a1b9a;
-        }
-        .nav {
-            text-align: right; /* Align the button to the right */
-            margin-bottom: 20px;
-        }
-        .nav a {
-            padding: 10px 15px;
-            background-color: #5bc0de;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-        .nav a:hover {
-            background-color: #31b0d5;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            background-color: #e1bee7;
-            border-radius: 8px;
         }
         th, td {
+            padding: 10px;
             border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
+            text-align: center;
         }
         th {
             background-color: #8e24aa;
             color: white;
         }
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-        tr:hover {
-            background-color: #ddd;
-        }
-        .filter-container {
-            margin-bottom: 20px;
-        }
-        .filter-container label {
-            font-weight: bold;
-        }
-        .filter-container input {
-            padding: 8px;
-            margin-left: 10px;
-        }
     </style>
 </head>
 <body>
     <h1>Invoices</h1>
-    
-    <div class="nav">
-        <a href="/">Back</a>
-        <a href="/export_invoices" id="export-link">Export Invoices</a> <!-- Link to export invoices -->
-    </div>
-
-    <div class="filter-container">
-        <label for="filter-date">Filter by Date:</label>
-        <input type="date" id="filter-date" onchange="filterInvoices()">
-    </div>
-
-    <table id="invoices-table">
+    <table>
         <tr>
             <th>ID</th>
             <th>Date & Time</th>
             <th>Total</th>
             <th>Money Received</th>
-            <th>Change</th>
             <th>Items Purchased</th>
         </tr>
-        {% for invoice in invoices %}
+        {% for transaction in transactions %}
         <tr>
-            <td>{{ invoice['id'] }}</td>
-            <td>{{ invoice['time'] }}</td>
-            <td>₱{{ invoice['total'] }}</td>
-            <td>₱{{ invoice['money_received'] }}</td>
-            <td>₱{{ invoice['change'] }}</td>
-            <td>{{ invoice['items'] }}</td>
+            <td>{{ transaction.id }}</td>
+            <td>{{ transaction.date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+            <td>₱{{ transaction.total }}</td>
+            <td>₱{{ transaction.money_received }}</td>
+            <td>
+                {% for item in transaction.items_purchased %}
+                    {{ item.name }} (x{{ item.quantity }}) - ₱{{ item.price }}<br>
+                {% endfor %}
+            </td>
         </tr>
         {% endfor %}
     </table>
-
-    <script>
-        function filterInvoices() {
-            const filterDate = document.getElementById('filter-date').value;
-            const table = document.getElementById('invoices-table');
-            const rows = table.getElementsByTagName('tr');
-
-            for (let i = 1; i < rows.length; i++) {
-                const dateCell = rows[i].cells[1].innerText.split(' ')[0]; // Get only the date part
-                if (filterDate === '' || dateCell === filterDate) {
-                    rows[i].style.display = ''; // Show the row
-                } else {
-                    rows[i].style.display = 'none'; // Hide the row
-                }
-            }
-        }
-    </script>
 </body>
 </html>

@@ -57,9 +57,10 @@
         }
         .item-button {
             display: inline-block;
-            width: 120px;
-            padding: 10px;
+            width: 150px;
+            padding: 15px;
             margin: 5px;
+            font-size: 16px;
             background-color: #8e24aa;
             color: white;
             border: none;
@@ -76,16 +77,27 @@
             border-radius: 8px;
             margin-top: 10px;
         }
-        button {
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .quantity-button {
+            width: 30px;
+            height: 30px;
+            font-size: 18px;
+            border: none;
             background-color: #8e24aa;
             color: white;
-            border: none;
-            cursor: pointer;
             border-radius: 5px;
-            padding: 10px 20px;
+            cursor: pointer;
         }
-        button:hover {
+        .quantity-button:hover {
             background-color: #7b1fa2;
+        }
+        #total, #change {
+            font-size: 18px;
+            margin-top: 10px;
         }
     </style>
     <script>
@@ -96,29 +108,35 @@
             if (!existingItem) {
                 const itemContainer = document.createElement('div');
                 itemContainer.setAttribute('data-id', itemId);
-                itemContainer.textContent = `${itemName}: ₱${itemPrice} `;
+                itemContainer.classList.add('quantity-control');
+                itemContainer.innerHTML = `
+                    ${itemName}: ₱${itemPrice}
+                    <button class="quantity-button" onclick="adjustQuantity('${itemId}', ${itemPrice}, -1)">-</button>
+                    <span id="quantity-${itemId}">1</span>
+                    <button class="quantity-button" onclick="adjustQuantity('${itemId}', ${itemPrice}, 1)">+</button>
+                `;
+                itemContainer.setAttribute('data-price', itemPrice);
+                itemContainer.setAttribute('data-quantity', 1);
                 
-                const quantitySelect = document.createElement('select');
-                quantitySelect.name = 'quantity';
-                quantitySelect.onchange = calculateTotal;
-                for (let i = 1; i <= 10; i++) {
-                    const option = document.createElement('option');
-                    option.value = i;
-                    option.text = i;
-                    quantitySelect.appendChild(option);
-                }
-
-                itemContainer.appendChild(quantitySelect);
                 reviewSection.appendChild(itemContainer);
             }
             calculateTotal();
         }
 
+        function adjustQuantity(itemId, itemPrice, delta) {
+            const itemContainer = document.querySelector(`#review-section [data-id='${itemId}']`);
+            let quantity = parseInt(itemContainer.getAttribute('data-quantity')) + delta;
+            if (quantity < 1) quantity = 1;
+            itemContainer.setAttribute('data-quantity', quantity);
+            document.getElementById(`quantity-${itemId}`).textContent = quantity;
+            calculateTotal();
+        }
+
         function calculateTotal() {
             let total = 0;
-            document.querySelectorAll('#review-section div').forEach(itemContainer => {
-                const itemPrice = parseFloat(itemContainer.textContent.split('₱')[1]);
-                const quantity = itemContainer.querySelector('select').value || 1;
+            document.querySelectorAll('#review-section .quantity-control').forEach(itemContainer => {
+                const itemPrice = parseFloat(itemContainer.getAttribute('data-price'));
+                const quantity = parseInt(itemContainer.getAttribute('data-quantity'));
                 total += itemPrice * quantity;
             });
             document.getElementById('total').innerText = 'Total: ₱' + total.toFixed(2);

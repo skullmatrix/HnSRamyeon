@@ -31,29 +31,11 @@
             text-decoration: none;
             border-radius: 5px;
         }
-        nav a:hover {
-            background-color: #7b1fa2;
-        }
-        .search-bar {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .search-bar input {
-            padding: 10px;
-            width: 80%;
-            border-radius: 5px;
-            border: 1px solid #8e24aa;
-        }
         .item-type {
             margin-top: 10px;
             padding: 8px;
             background-color: #e1bee7;
             border-radius: 8px;
-        }
-        .item-type h3 {
-            color: #4a148c;
-            font-size: 18px;
-            margin: 0;
         }
         .item-button {
             display: inline-block;
@@ -68,43 +50,12 @@
             text-align: center;
             border-radius: 8px;
             cursor: pointer;
-            box-sizing: border-box;
-        }
-        .item-button:hover {
-            background-color: #7b1fa2;
         }
         #review-section {
             background-color: #e0e0e0;
             padding: 10px;
             border-radius: 8px;
             margin-top: 10px;
-        }
-        .quantity-control {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 5px 0;
-        }
-        .quantity-buttons {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .quantity-button {
-            width: 30px;
-            height: 30px;
-            font-size: 18px;
-            border: none;
-            background-color: #8e24aa;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .quantity-button:hover {
-            background-color: #7b1fa2;
         }
         #total, #change {
             font-size: 18px;
@@ -129,95 +80,7 @@
             cursor: pointer;
             margin-top: 20px;
         }
-        .submit-button:hover {
-            background-color: #4a148c;
-        }
     </style>
-    <script>
-        function updateReview(itemId, itemName, itemPrice) {
-            const reviewSection = document.getElementById('review-section');
-            let existingItem = document.querySelector(`#review-section [data-id='${itemId}']`);
-            
-            if (existingItem) {
-                let quantity = parseInt(existingItem.getAttribute('data-quantity')) + 1;
-                existingItem.setAttribute('data-quantity', quantity);
-                document.getElementById(`quantity-${itemId}`).textContent = quantity;
-            } else {
-                const itemContainer = document.createElement('div');
-                itemContainer.setAttribute('data-id', itemId);
-                itemContainer.classList.add('quantity-control');
-                itemContainer.innerHTML = `
-                    <span>${itemName}: ₱${itemPrice}</span>
-                    <div class="quantity-buttons">
-                        <button type="button" class="quantity-button" onclick="adjustQuantity('${itemId}', ${itemPrice}, -1)">-</button>
-                        <span id="quantity-${itemId}">1</span>
-                        <button type="button" class="quantity-button" onclick="adjustQuantity('${itemId}', ${itemPrice}, 1)">+</button>
-                    </div>
-                `;
-                itemContainer.setAttribute('data-price', itemPrice);
-                itemContainer.setAttribute('data-quantity', 1);
-                
-                reviewSection.appendChild(itemContainer);
-            }
-            calculateTotal();
-        }
-
-        function adjustQuantity(itemId, itemPrice, delta) {
-            const itemContainer = document.querySelector(`#review-section [data-id='${itemId}']`);
-            let quantity = parseInt(itemContainer.getAttribute('data-quantity')) + delta;
-            
-            if (quantity <= 0) {
-                itemContainer.remove();
-            } else {
-                itemContainer.setAttribute('data-quantity', quantity);
-                document.getElementById(`quantity-${itemId}`).textContent = quantity;
-            }
-            
-            calculateTotal();
-        }
-
-        function calculateTotal() {
-            let total = 0;
-            document.querySelectorAll('#review-section .quantity-control').forEach(itemContainer => {
-                const itemPrice = parseFloat(itemContainer.getAttribute('data-price'));
-                const quantity = parseInt(itemContainer.getAttribute('data-quantity'));
-                total += itemPrice * quantity;
-            });
-            document.getElementById('total').innerText = 'Total: ₱' + total.toFixed(2);
-            calculateChange();
-        }
-
-        function calculateChange() {
-            const total = parseFloat(document.getElementById('total').innerText.replace('Total: ₱', '')) || 0;
-            const moneyReceived = parseFloat(document.getElementById('money_received').value) || 0;
-            const change = Math.max(0, moneyReceived - total);
-            document.getElementById('change').innerText = 'Change: ₱' + change.toFixed(2);
-        }
-
-        function validateForm(event) {
-            const total = parseFloat(document.getElementById('total').innerText.replace('Total: ₱', '')) || 0;
-            const moneyReceived = parseFloat(document.getElementById('money_received').value) || 0;
-
-            if (total <= 0) {
-                event.preventDefault();
-                alert("Please add at least one item to the transaction.");
-                return;
-            }
-
-            if (!moneyReceived || moneyReceived < total) {
-                event.preventDefault();
-                alert("Please enter a valid amount of money received.");
-            }
-        }
-
-        function filterItems() {
-            const query = document.getElementById('search_query').value.toLowerCase();
-            document.querySelectorAll('.item-button').forEach(button => {
-                const itemName = button.getAttribute('data-name').toLowerCase();
-                button.style.display = itemName.includes(query) ? 'inline-block' : 'none';
-            });
-        }
-    </script>
 </head>
 <body>
     <h1>H & S Ramyeon</h1>
@@ -228,14 +91,6 @@
         <a href="/inventory">Inventory</a>
     </nav>
 
-    <div class="search-bar">
-        <form method="GET" action="/">
-            <input type="text" id="search_query" name="search_query" placeholder="Search for items..." oninput="filterItems()">
-        </form>
-    </div>
-
-    <h2>Available Items</h2>
-
     <form action="/make_transaction" method="POST" onsubmit="validateForm(event)">
         {% for type in ['Soup Base', 'Stir Fry', 'Cups', 'Toppings', 'Sweets', 'Drinks'] %}
         <div class="item-type">
@@ -243,7 +98,7 @@
             <div>
                 {% for item in items %}
                 {% if item['type'] == type %}
-                <button type="button" class="item-button" data-name="{{ item['name'] }}" data-price="{{ item['price'] }}" onclick="updateReview('{{ item['id'] }}', '{{ item['name'] }}', {{ item['price'] }})">
+                <button type="button" class="item-button" onclick="addItemToTransaction('{{ item['id'] }}', '{{ item['name'] }}', {{ item['price'] }})">
                     {{ item['name'] }}: ₱{{ item['price'] }}
                 </button>
                 {% endif %}
@@ -253,17 +108,69 @@
         {% endfor %}
 
         <div id="review-section">
-            <!-- Selected items with quantities will appear here -->
+            <!-- Selected items will appear here with quantities -->
         </div>
 
         <div id="total">Total: ₱0.00</div>
 
         <label for="money_received">Money Received:</label>
-        <input type="number" step="0.01" id="money_received" name="money_received" oninput="calculateChange()">
+        <input type="number" name="money_received" id="money_received" oninput="calculateChange()">
 
         <div id="change">Change: ₱0.00</div>
 
         <button type="submit" class="submit-button">Make Transaction</button>
     </form>
+
+    <script>
+        function addItemToTransaction(itemId, itemName, itemPrice) {
+            const reviewSection = document.getElementById('review-section');
+            let itemContainer = document.querySelector(`[data-id='${itemId}']`);
+            
+            if (!itemContainer) {
+                itemContainer = document.createElement('div');
+                itemContainer.dataset.id = itemId;
+                itemContainer.innerHTML = `
+                    <input type="hidden" name="item_id" value="${itemId}">
+                    <span>${itemName}: ₱${itemPrice}</span>
+                    <input type="number" name="quantity" value="1" min="1" onchange="updateTotal()">
+                `;
+                reviewSection.appendChild(itemContainer);
+            } else {
+                const quantityInput = itemContainer.querySelector('input[name="quantity"]');
+                quantityInput.value = parseInt(quantityInput.value) + 1;
+            }
+            updateTotal();
+        }
+
+        function updateTotal() {
+            let total = 0;
+            document.querySelectorAll('#review-section div').forEach(item => {
+                const price = parseFloat(item.querySelector('span').textContent.split('₱')[1]);
+                const quantity = parseInt(item.querySelector('input[name="quantity"]').value);
+                total += price * quantity;
+            });
+            document.getElementById('total').textContent = 'Total: ₱' + total.toFixed(2);
+        }
+
+        function calculateChange() {
+            const total = parseFloat(document.getElementById('total').textContent.replace('Total: ₱', ''));
+            const moneyReceived = parseFloat(document.getElementById('money_received').value) || 0;
+            const change = Math.max(0, moneyReceived - total);
+            document.getElementById('change').textContent = 'Change: ₱' + change.toFixed(2);
+        }
+
+        function validateForm(event) {
+            const total = parseFloat(document.getElementById('total').textContent.replace('Total: ₱', ''));
+            const moneyReceived = parseFloat(document.getElementById('money_received').value) || 0;
+
+            if (total <= 0) {
+                event.preventDefault();
+                alert("Please add at least one item to the transaction.");
+            } else if (moneyReceived < total) {
+                event.preventDefault();
+                alert("Please enter a valid amount of money received.");
+            }
+        }
+    </script>
 </body>
 </html>

@@ -217,21 +217,6 @@
                 button.style.display = itemName.includes(query) ? 'inline-block' : 'none';
             });
         }
-            }
-        function filterInvoices() {
-    const filterDate = document.getElementById('filter-date').value;
-    const table = document.getElementById('invoices-table');
-    const rows = table.getElementsByTagName('tr');
-
-    for (let i = 1; i < rows.length; i++) {
-        const dateCell = rows[i].cells[1].innerText.split(' ')[0]; // Get only the date part
-        if (filterDate === '' || dateCell === filterDate) {
-            rows[i].style.display = ''; // Show the row
-        } else {
-            rows[i].style.display = 'none'; // Hide the row
-        }
-    }
-}
     </script>
 </head>
 <body>

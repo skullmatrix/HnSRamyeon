@@ -17,12 +17,52 @@
             text-align: center;
             color: #6a1b9a;
         }
+        .nav {
+            text-align: right; /* Align the button to the right */
+            margin-bottom: 20px;
+        }
+        .nav a {
+            padding: 10px 15px;
+            background-color: #5bc0de;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .nav a:hover {
+            background-color: #31b0d5;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
             background-color: #e1bee7;
             border-radius: 8px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #8e24aa;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #ddd;
+        }
+        .filter-container {
+            margin-bottom: 20px;
+        }
+        .filter-container label {
+            font-weight: bold;
+        }
+        .filter-container input {
+            padding: 8px;
+            margin-left: 10px;
         }
     </style>
 </head>
@@ -31,7 +71,12 @@
     
     <div class="nav">
         <a href="/">Back</a>
-        <a href="/export_invoices" id="export-link">Export Invoices</a>
+        <a href="/export_invoices" id="export-link">Export Invoices</a> <!-- Link to export invoices -->
+    </div>
+
+    <div class="filter-container">
+        <label for="filter-date">Filter by Date:</label>
+        <input type="date" id="filter-date" onchange="filterInvoices()">
     </div>
 
     <table id="invoices-table">
@@ -54,4 +99,22 @@
         </tr>
         {% endfor %}
     </table>
-</
+
+    <script>
+        function filterInvoices() {
+            const filterDate = document.getElementById('filter-date').value;
+            const table = document.getElementById('invoices-table');
+            const rows = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < rows.length; i++) {
+                const dateCell = rows[i].cells[1].innerText.split(' ')[0]; // Get only the date part
+                if (filterDate === '' || dateCell === filterDate) {
+                    rows[i].style.display = ''; // Show the row
+                } else {
+                    rows[i].style.display = 'none'; // Hide the row
+                }
+            }
+        }
+    </script>
+</body>
+</html>

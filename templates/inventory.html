@@ -68,6 +68,30 @@
         .edit-form button:hover {
             background-color: #6a1b9a;
         }
+        .item-button-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .item-button {
+            width: 180px;
+            height: 60px;
+            font-size: 16px;
+            background-color: #8e24aa;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .item-button:hover {
+            background-color: #7b1fa2;
+        }
     </style>
 </head>
 <body>
@@ -102,5 +126,15 @@
         </tr>
         {% endfor %}
     </table>
+
+    <!-- Aligned Item Buttons for Example (Add below table or in desired position) -->
+    <div class="item-button-container">
+        <!-- Example Buttons -->
+        <button class="item-button">Item 1</button>
+        <button class="item-button">Item 2</button>
+        <button class="item-button">Item 3</button>
+        <button class="item-button">Item 4</button>
+        <button class="item-button">Item 5</button>
+    </div>
 </body>
 </html>

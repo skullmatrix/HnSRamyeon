@@ -36,8 +36,61 @@ def initialize_database():
     );
     ''')
     conn.commit()
+
+    # Populate items if the table is empty
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM items")
+    if cursor.fetchone()[0] == 0:
+        items = [
+            ("Cheese Ramen Spicy", 99, "Soup Base", 100),
+            ("Nongshim", 89, "Soup Base", 100),
+            ("Ottogi Cheese Ramen", 99, "Soup Base", 100),
+            ("Nongshim JJWANG", 129, "Soup Base", 100),
+            ("SOON Ramen", 99, "Soup Base", 100),
+            ("JIN Ramen", 69, "Soup Base", 100),
+            ("Buldak 2X Spicy", 129, "Stir Fry", 100),
+            ("Buldak Black", 119, "Stir Fry", 100),
+            ("Buldak Carbonara", 109, "Stir Fry", 100),
+            ("Cheese Ramen Stir Fry", 109, "Stir Fry", 100),
+            ("JIN Ramen Cup", 63, "Cups", 100),
+            ("Nongshim Squid Jampong Cup", 55, "Cups", 100),
+            ("Paldo Pororo Cup", 59, "Cups", 100),
+            ("Shrimp Cup Ramen Small", 52, "Cups", 100),
+            ("Boiled Egg", 19, "Toppings", 100),
+            ("Crab Stick", 15, "Toppings", 100),
+            ("Fish Cake", 15, "Toppings", 100),
+            ("Fishball", 15, "Toppings", 100),
+            ("Golden Cheese Ball", 15, "Toppings", 100),
+            ("Ham", 15, "Toppings", 100),
+            ("Kimchi", 10, "Toppings", 100),
+            ("Lobster Ball", 19, "Toppings", 100),
+            ("Lobster Stick", 15, "Toppings", 100),
+            ("Lotte Luncheon Meat", 119, "Toppings", 100),
+            ("Namkwang Seaweed", 19, "Toppings", 100),
+            ("Raw Egg", 15, "Toppings", 100),
+            ("Sajo Gochujang", 76, "Toppings", 100),
+            ("Sanjo Doenjang", 68, "Toppings", 100),
+            ("Shabu2x Mix", 15, "Toppings", 100),
+            ("Sliced Cheese", 19, "Toppings", 100),
+            ("Ssamjang", 78, "Toppings", 100),
+            ("Almond Choco Ball", 69, "Sweets", 100),
+            ("Ice Cream Cone", 10, "Sweets", 100),
+            ("Pepero", 59, "Sweets", 100),
+            ("Binggrae Milk", 59, "Drinks", 100),
+            ("Caffee Latte Can", 49, "Drinks", 100),
+            ("Chupa Chups", 69, "Drinks", 100),
+            ("Flavored Yakult", 49, "Drinks", 100),
+            ("Ice Talk", 60, "Drinks", 100),
+            ("Jinro Soju", 110, "Drinks", 100),
+            ("Milkis", 49, "Drinks", 100),
+            ("Welch’s", 70, "Drinks", 100),
+            ("Yakult Orig", 39, "Drinks", 100),
+        ]
+        cursor.executemany('INSERT INTO items (name, price, type, quantity) VALUES (?, ?, ?, ?)', items)
+        conn.commit()
     conn.close()
 
+# Initialize the database
 initialize_database()
 
 @app.route('/', methods=['GET'])
@@ -86,6 +139,18 @@ def edit_item(item_id):
     items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
     conn.close()
     return render_template('add_item.html', item=item, items=items)
+
+@app.route('/inventory', methods=['GET', 'POST'])
+def inventory():
+    conn = get_db_connection()
+    if request.method == 'POST':
+        item_id = request.form['item_id']
+        new_quantity = int(request.form['new_quantity'])
+        conn.execute('UPDATE items SET quantity = ? WHERE id = ?', (new_quantity, item_id))
+        conn.commit()
+    items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
+    conn.close()
+    return render_template('inventory.html', items=items)
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -225,27 +225,30 @@ def export_invoices():
     # Send the file as a download
     return send_file(csv_file, as_attachment=True, download_name=filename)
     
-
 @app.route('/export_inventory')
 def export_inventory():
     conn = get_db_connection()
-    inventory = conn.execute('SELECT * FROM items').fetchall()
+    inventory = conn.execute('SELECT * FROM items').fetchall()  # Fetch inventory items
     conn.close()
 
-    # Create CSV output
-    output = io.StringIO()
-    writer = csv.writer(output)
-    writer.writerow(['Item Name', 'Price', 'Type', 'Quantity'])  # Header
-    for item in inventory:
-        writer.writerow([item['name'], item['price'], item['type'], item['quantity']])
-    
-    output.seek(0)
+    # Create a CSV file with a filename based on the current date and time
+    current_time = datetime.now(pytz.timezone('Asia/Manila'))
+    filename = current_time.strftime('%Y-%m-%d_%H-%M-%S_inventory.csv')  # Create a filename
+    csv_file = f'/tmp/{filename}'
 
-    return Response(
-        output,
-        mimetype="text/csv",
-        headers={"Content-Disposition": "attachment;filename=inventory.csv"}
-    )
+    with open(csv_file, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Item Name', 'Price', 'Type', 'Quantity'])  # Header row
+        for item in inventory:
+            writer.writerow([
+                item['name'],         # Item Name
+                item['price'],       # Price
+                item['type'],        # Type
+                item['quantity']     # Quantity
+            ])
+
+    # Send the file as a download
+    return send_file(csv_file, as_attachment=True, download_name=filename)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

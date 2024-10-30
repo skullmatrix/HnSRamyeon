@@ -114,7 +114,7 @@ def add_item():
         name = request.form['name']
         price = int(request.form['price'])
         type = request.form['type']
-        quantity = int(request.form['quantity'])
+        quantity = int(request.form.get('quantity', 100))  # Optional quantity for adding new items
 
         if item_id:  # Edit existing item
             conn.execute('UPDATE items SET name = ?, price = ?, type = ?, quantity = ? WHERE id = ?', 
@@ -129,7 +129,7 @@ def add_item():
 
     items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
     conn.close()
-    return render_template('add_item.html', items=items)
+    return render_template('edit_item.html', items=items)
 
 @app.route('/edit_item/<int:item_id>', methods=['GET'])
 def edit_item(item_id):
@@ -137,7 +137,7 @@ def edit_item(item_id):
     item = conn.execute('SELECT * FROM items WHERE id = ?', (item_id,)).fetchone()
     items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
     conn.close()
-    return render_template('add_item.html', item=item, items=items)
+    return render_template('edit_item.html', item=item, items=items)
 
 @app.route('/inventory', methods=['GET', 'POST'])
 def inventory():

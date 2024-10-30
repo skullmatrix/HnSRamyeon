@@ -1,3 +1,4 @@
+
 import os
 import csv
 from flask import Flask, request, render_template, redirect, url_for, send_file
@@ -93,66 +94,6 @@ def initialize_database():
 # Initialize the database
 initialize_database()
 
-@app.route('/', methods=['GET'])
-def index():
-    conn = get_db_connection()
-    items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
-    conn.close()
-    return render_template('index.html', items=items)
-
-@app.route('/invoices', methods=['GET'])
-def invoices():
-    conn = get_db_connection()
-    invoices = conn.execute('SELECT * FROM invoices ORDER BY time DESC').fetchall()
-    conn.close()
-    return render_template('invoices.html', invoices=invoices)
-
-@app.route('/add_item', methods=['GET', 'POST'])
-def add_item():
-    conn = get_db_connection()
-    if request.method == 'POST':
-        item_id = request.form.get('item_id')
-        name = request.form['name']
-        price = int(request.form['price'])
-        type = request.form['type']
-        quantity = int(request.form.get('quantity', 100))
-
-        if item_id:
-            conn.execute('UPDATE items SET name = ?, price = ?, type = ?, quantity = ? WHERE id = ?', 
-                         (name, price, type, quantity, item_id))
-        else:
-            conn.execute('INSERT INTO items (name, price, type, quantity) VALUES (?, ?, ?, ?)', 
-                         (name, price, type, quantity))
-        
-        conn.commit()
-        conn.close()
-        return redirect(url_for('add_item'))
-
-    items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
-    conn.close()
-    return render_template('add_item.html', items=items)
-
-@app.route('/edit_item/<int:item_id>', methods=['GET'])
-def edit_item(item_id):
-    conn = get_db_connection()
-    item = conn.execute('SELECT * FROM items WHERE id = ?', (item_id,)).fetchone()
-    items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
-    conn.close()
-    return render_template('add_item.html', item=item, items=items)
-
-@app.route('/inventory', methods=['GET', 'POST'])
-def inventory():
-    conn = get_db_connection()
-    if request.method == 'POST':
-        item_id = request.form['item_id']
-        new_quantity = int(request.form['new_quantity'])
-        conn.execute('UPDATE items SET quantity = ? WHERE id = ?', (new_quantity, item_id))
-        conn.commit()
-    items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
-    conn.close()
-    return render_template('inventory.html', items=items)
-
-
 @app.route('/')
 def index():
     conn = get_db_connection()
@@ -193,6 +134,13 @@ def make_transaction():
     conn.close()
 
     return redirect(url_for('index'))
+
+@app.route('/invoices', methods=['GET'])
+def invoices():
+    conn = get_db_connection()
+    invoices = conn.execute('SELECT * FROM invoices ORDER BY time DESC').fetchall()
+    conn.close()
+    return render_template('invoices.html', invoices=invoices)
 
 if __name__ == '__main__':
     app.run(debug=True)

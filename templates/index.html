@@ -3,160 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>H & S Ramyeon</title>
+    <title>Ramen Shop POS</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f3e5f5;
-            color: #4a148c;
-            max-width: 800px;
-            margin: auto;
-            padding: 20px;
-        }
-        h1 {
-            text-align: center;
-            font-size: 32px;
-            color: #6a1b9a;
-        }
-        nav {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        nav a {
-            padding: 10px 15px;
-            background-color: #8e24aa;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-        nav a:hover {
-            background-color: #7b1fa2;
-        }
-        .item-type {
-            margin-top: 10px;
-            padding: 8px;
-            background-color: #e1bee7;
-            border-radius: 8px;
-        }
-        .item-type h3 {
-            color: #4a148c;
-            font-size: 18px;
-            margin: 0;
-        }
-        #review-section {
-            background-color: #e0e0e0;
+        .item-button {
+            display: inline-block;
+            margin: 5px;
             padding: 10px;
-            border-radius: 8px;
-            margin-top: 10px;
-        }
-        button {
-            background-color: #8e24aa;
-            color: white;
-            border: none;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
             cursor: pointer;
-            border-radius: 5px;
-            padding: 10px 20px;
         }
-        button:hover {
-            background-color: #7b1fa2;
+
+        .item-button.selected {
+            background-color: #add8e6;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+        }
+
+        .quantity-controls button {
+            padding: 5px 10px;
+            margin: 0 5px;
+        }
+
+        .quantity {
+            width: 50px;
+            text-align: center;
         }
     </style>
-    <script>
-        function updateReview() {
-            const reviewSection = document.getElementById('review-section');
-            reviewSection.innerHTML = '';
-            let total = 0;
-
-            document.querySelectorAll('.item-row').forEach(row => {
-                const checkbox = row.querySelector('input[type="checkbox"]');
-                if (checkbox.checked) {
-                    const price = parseFloat(checkbox.getAttribute('data-price'));
-                    const quantitySelect = document.createElement('select');
-                    quantitySelect.name = 'quantity';
-                    quantitySelect.onchange = calculateTotal;
-
-                    for (let i = 1; i <= 10; i++) { // Dropdown for quantities from 1 to 10
-                        const option = document.createElement('option');
-                        option.value = i;
-                        option.text = i;
-                        quantitySelect.appendChild(option);
-                    }
-
-                    const quantityContainer = document.createElement('div');
-                    quantityContainer.textContent = `${checkbox.dataset.name}: ₱${price} `;
-                    quantityContainer.appendChild(quantitySelect);
-                    reviewSection.appendChild(quantityContainer);
-                }
-            });
-            calculateTotal();
-        }
-
-        function calculateTotal() {
-            let total = 0;
-            document.querySelectorAll('#review-section select').forEach(select => {
-                const price = parseFloat(select.parentElement.textContent.split('₱')[1]);
-                total += price * (parseInt(select.value) || 1);
-            });
-            document.getElementById('total').innerText = 'Total: ₱' + total.toFixed(2);
-            calculateChange();
-        }
-
-        function calculateChange() {
-            const total = parseFloat(document.getElementById('total').innerText.replace('Total: ₱', '')) || 0;
-            const moneyReceived = parseFloat(document.getElementById('money_received').value) || 0;
-            const change = Math.max(0, moneyReceived - total);
-            document.getElementById('change').innerText = 'Change: ₱' + change.toFixed(2);
-        }
-
-        function validateForm(event) {
-            const moneyReceived = document.getElementById('money_received').value;
-            if (!moneyReceived || isNaN(moneyReceived) || Number(moneyReceived) <= 0) {
-                event.preventDefault(); // Prevent form submission
-                alert("Please enter a valid amount of money received.");
-            }
-        }
-    </script>
 </head>
 <body>
-    <h1>H & S Ramyeon</h1>
-
-    <nav>
-        <a href="/add_item">Edit Items</a>
-        <a href="/invoices">View Invoices</a>
-    </nav>
-
-    <h2>Available Items</h2>
-
-    <form action="/make_transaction" method="POST" onsubmit="validateForm(event)">
-        {% for type in ['Soup Base', 'Stir Fry', 'Cups', 'Toppings', 'Sweets', 'Drinks'] %}
-        <div class="item-type">
-            <h3>{{ type }}</h3>
-            <ul>
-                {% for item in items %}
-                {% if item['type'] == type %}
-                <li class="item-row">
-                    <input type="checkbox" name="item_id" value="{{ item['id'] }}" data-name="{{ item['name'] }}" data-price="{{ item['price'] }}" onchange="updateReview()">
-                    {{ item['name'] }}: ₱{{ item['price'] }}
-                </li>
-                {% endif %}
-                {% endfor %}
-            </ul>
+    <h1>Ramen Shop POS</h1>
+    <form action="/" method="POST">
+        <input type="text" name="search_query" placeholder="Search items..." autofocus>
+        <button type="submit">Search</button>
+        <a href="{{ url_for('inventory') }}">Inventory</a> <!-- Inventory button -->
+    </form>
+    <form action="/make_transaction" method="POST">
+        <div id="items">
+            {% for item in items %}
+                <div class="item-button" onclick="toggleItem(this, {{ item['id'] }})">
+                    {{ item['name'] }}
+                </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-
-        <div id="review-section">
-            <!-- Selected items with quantities will appear here -->
-        </div>
-
-        <div id="total">Total: ₱0.00</div>
-
-        <label for="money_received">Money:</label>
-        <input type="number" step="0.01" id="money_received" name="money_received" oninput="calculateChange()">
-        <div id="change">Change: ₱0.00</div>
-
+        <h2>Selected Items:</h2>
+        <div id="selected-items"></div>
         <button type="submit">Make Transaction</button>
     </form>
+    <script>
+        let selectedItems = {};
+
+        function toggleItem(element, itemId) {
+            if (element.classList.contains('selected')) {
+                element.classList.remove('selected');
+                delete selectedItems[itemId];
+            } else {
+                element.classList.add('selected');
+                selectedItems[itemId] = 1;  // Start with 1 quantity
+            }
+            updateSelectedItems();
+        }
+
+        function updateSelectedItems() {
+            const selectedItemsDiv = document.getElementById('selected-items');
+            selectedItemsDiv.innerHTML = '';
+            for (const [id, quantity] of Object.entries(selectedItems)) {
+                selectedItemsDiv.innerHTML += `
+                    <div>
+                        Item ${id}: 
+                        <div class="quantity-controls">
+                            <button onclick="changeQuantity(${id}, -1)">-</button>
+                            <input type="text" class="quantity" name="quantity[${id}]" value="${quantity}" readonly>
+                            <button onclick="changeQuantity(${id}, 1)">+</button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function changeQuantity(itemId, delta) {
+            if (selectedItems[itemId] + delta > 0) {
+                selectedItems[itemId] += delta;
+            }
+            updateSelectedItems();
+        }
+    </script>
 </body>
 </html>

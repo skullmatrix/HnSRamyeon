@@ -51,6 +51,22 @@
             background-color: #8e24aa;
             color: white;
         }
+        .edit-form input[type="number"] {
+            width: 60px;
+            padding: 5px;
+            text-align: center;
+        }
+        .edit-form button {
+            padding: 5px 10px;
+            background-color: #4a148c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .edit-form button:hover {
+            background-color: #6a1b9a;
+        }
     </style>
 </head>
 <body>
@@ -79,7 +95,7 @@
                 <form class="edit-form" method="POST" action="{{ url_for('inventory') }}">
                     <input type="hidden" name="item_id" value="{{ item['id'] }}">
                     <input type="number" name="new_quantity" value="{{ item['quantity'] }}" min="0">
-                    <button type="submit" class="button">Update</button>
+                    <button type="submit">Update</button>
                 </form>
             </td>
         </tr>

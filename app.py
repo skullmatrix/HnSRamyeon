@@ -1,4 +1,3 @@
-
 import os
 import csv
 from flask import Flask, request, render_template, redirect, url_for, send_file, Response
@@ -33,7 +32,8 @@ def initialize_database():
         money_received INTEGER NOT NULL,
         change INTEGER NOT NULL,
         time TEXT NOT NULL,
-        items TEXT NOT NULL
+        items TEXT NOT NULL,
+        payment_mode TEXT NOT NULL  -- Added payment_mode column
     );
     ''')
     conn.commit()
@@ -130,6 +130,7 @@ def edit_item(item_id):
     items = conn.execute('SELECT * FROM items ORDER BY type, name').fetchall()
     conn.close()
     return render_template('add_item.html', item=item, items=items)
+
 @app.route('/inventory', methods=['GET', 'POST'])
 def inventory():
     conn = get_db_connection()
@@ -142,14 +143,12 @@ def inventory():
     conn.close()
     return render_template('inventory.html', items=items)
 
-if __name__ == '__main__':
-    app.run(debug=True)
-
 @app.route('/make_transaction', methods=['POST'])
 def make_transaction():
     item_ids = request.form.getlist('item_id')
     quantities = request.form.getlist('quantity')
     money_received = int(request.form['money_received'])
+    payment_mode = request.form['payment_mode']  # Get the payment mode
     conn = get_db_connection()
     total = 0
     items_purchased = []
@@ -181,9 +180,9 @@ def make_transaction():
     # Prepare items details for invoice
     items_details = ', '.join([f"{name} (x{quantity}) P{item_total}" for name, price, quantity, item_total in items_purchased])
 
-    # Insert invoice record
-    conn.execute('INSERT INTO invoices (total, money_received, change, time, items) VALUES (?, ?, ?, ?, ?)',
-                 (total, money_received, change, purchase_time, items_details))
+    # Insert invoice record including payment mode
+    conn.execute('INSERT INTO invoices (total, money_received, change, time, items, payment_mode) VALUES (?, ?, ?, ?, ?, ?)',
+                 (total, money_received, change, purchase_time, items_details, payment_mode))  # Add payment_mode here
 
     # Commit and close connection
     conn.commit()
@@ -218,7 +217,7 @@ def export_invoices():
 
     with open(csv_file, mode='w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(['ID', 'Date & Time', 'Total', 'Money Received', 'Change', 'Items Purchased'])
+        writer.writerow(['ID', 'Date & Time', 'Total', 'Money Received', 'Change', 'Items Purchased', 'Payment Mode'])  # Added Payment Mode header
         for invoice in invoices:
             writer.writerow([
                 invoice['id'], 
@@ -226,7 +225,8 @@ def export_invoices():
                 invoice['total'], 
                 invoice['money_received'], 
                 invoice['change'], 
-                invoice['items']
+                invoice['items'],
+                invoice['payment_mode']  # Added Payment Mode data
             ])
 
     return send_file(csv_file, as_attachment=True, download_name=filename)

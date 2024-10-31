@@ -139,7 +139,14 @@
 
     <form action="/make_transaction" method="POST" onsubmit="return validateForm(event)">
         <div id="items-section">
-            <!-- Dynamically generated item buttons by category -->
+            {% for item in items %}
+            <div class="item-type">
+                <h3>{{ item.type }}</h3>
+                <button type="button" class="item-button" data-name="{{ item.name }}" data-price="{{ item.price }}" onclick="addItemToTransaction('{{ item.id }}', '{{ item.name }}', {{ item.price }})">
+                    {{ item.name }}: ₱{{ item.price }}
+                </button>
+            </div>
+            {% endfor %}
         </div>
 
         <div id="review-section">

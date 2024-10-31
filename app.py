@@ -150,6 +150,7 @@ def make_transaction():
     item_ids = request.form.getlist('item_id')
     quantities = request.form.getlist('quantity')
     money_received = int(request.form['money_received'])
+    mode = request.form.getlist('mode')
     conn = get_db_connection()
     total = 0
     items_purchased = []
@@ -182,8 +183,8 @@ def make_transaction():
     items_details = ', '.join([f"{name} (x{quantity}) P{item_total}" for name, price, quantity, item_total in items_purchased])
 
     # Insert invoice record
-    conn.execute('INSERT INTO invoices (total, money_received, change, time, items) VALUES (?, ?, ?, ?, ?)',
-                 (total, money_received, change, purchase_time, items_details))
+    conn.execute('INSERT INTO invoices (total, money_received, mode, time, items) VALUES (?, ?, ?, ?, ?)',
+                 (total, money_received, mode, purchase_time, items_details))
 
     # Commit and close connection
     conn.commit()

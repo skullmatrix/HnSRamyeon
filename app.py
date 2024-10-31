@@ -150,7 +150,7 @@ def make_transaction():
     item_ids = request.form.getlist('item_id')
     quantities = request.form.getlist('quantity')
     money_received = int(request.form['money_received'])
-    mode = request.form.getlist('mode')
+    mode = request.form['mode']  # Changed to retrieve a single value instead of a list
     conn = get_db_connection()
     total = 0
     items_purchased = []

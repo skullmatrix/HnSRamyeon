@@ -36,14 +36,6 @@ def initialize_database():
         items TEXT NOT NULL
     );
     ''')
-
-    # Add mode column to invoices if it doesn't exist
-    try:
-        conn.execute('ALTER TABLE invoices ADD COLUMN mode TEXT')
-    except sqlite3.OperationalError:
-        # Column already exists
-        pass
-
     conn.commit()
 
     # Populate items if the table is empty
@@ -158,7 +150,7 @@ def make_transaction():
     item_ids = request.form.getlist('item_id')
     quantities = request.form.getlist('quantity')
     money_received = int(request.form['money_received'])
-    mode = request.form['mode']  # Retrieve the mode of payment
+    mode = request.form.getlist('mode')
     conn = get_db_connection()
     total = 0
     items_purchased = []
@@ -175,7 +167,7 @@ def make_transaction():
         quantity = int(quantities[i])
         item_total = item['price'] * quantity
         total += item_total
-        items_purchased.append(f"{item['name']} (x{quantity}) P{item_total}")
+        items_purchased.append((item['name'], item['price'], quantity, item_total))
 
         # Update inventory: subtract quantity from each item in stock
         conn.execute('UPDATE items SET quantity = quantity - ? WHERE id = ?', (quantity, item_id))
@@ -188,7 +180,7 @@ def make_transaction():
     purchase_time = datetime.now(philippine_tz).strftime('%Y-%m-%d %H:%M:%S')
 
     # Prepare items details for invoice
-    items_details = ', '.join(items_purchased)
+    items_details = ', '.join([f"{name} (x{quantity}) P{item_total}" for name, price, quantity, item_total in items_purchased])
 
     # Insert invoice record
     conn.execute('INSERT INTO invoices (total, money_received, mode, time, items) VALUES (?, ?, ?, ?, ?)',
@@ -198,7 +190,7 @@ def make_transaction():
     conn.commit()
     conn.close()
     
-    return redirect(url_for('view_invoices'))  # Redirect to the invoices page after making a transaction
+    return redirect(url_for('index'))
 
 @app.route('/invoices', methods=['GET'])
 def invoices():

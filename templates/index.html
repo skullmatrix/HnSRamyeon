@@ -137,21 +137,10 @@
         <input type="text" id="search_query" placeholder="Search for items..." oninput="filterItems()">
     </div>
 
-    <form action="/make_transaction" method="POST" onsubmit="validateForm(event)">
-        {% for type in ['Soup Base', 'Stir Fry', 'Cups', 'Toppings', 'Sweets', 'Drinks'] %}
-        <div class="item-type">
-            <h3>{{ type }}</h3>
-            <div>
-                {% for item in items %}
-                {% if item['type'] == type %}
-                <button type="button" class="item-button" data-name="{{ item['name'] }}" data-price="{{ item['price'] }}" onclick="addItemToTransaction('{{ item['id'] }}', '{{ item['name'] }}', {{ item['price'] }})">
-                    {{ item['name'] }}: ₱{{ item['price'] }}
-                </button>
-                {% endif %}
-                {% endfor %}
-            </div>
+    <form action="/make_transaction" method="POST" onsubmit="return validateForm(event)">
+        <div id="items-section">
+            <!-- Dynamically generated item buttons by category -->
         </div>
-        {% endfor %}
 
         <div id="review-section">
             <!-- Selected items with quantities will appear here -->
@@ -160,7 +149,7 @@
         <div id="total">Total: ₱0.00</div>
 
         <label for="money_received">Money Received:</label>
-        <input type="number" name="money_received" id="money_received" oninput="calculateChange()">
+        <input type="number" name="money_received" id="money_received" oninput="calculateChange()" required>
 
         <div id="change">Change: ₱0.00</div>
 
@@ -174,6 +163,8 @@
     </form>
 
     <script>
+        let items = {};  // Store items with their ID and quantity
+
         function addItemToTransaction(itemId, itemName, itemPrice) {
             const reviewSection = document.getElementById('review-section');
             let existingItem = document.querySelector(`#review-section [data-id='${itemId}']`);
@@ -193,6 +184,7 @@
                     <input type="hidden" name="quantity" value="1" id="hidden-quantity-${itemId}">
                 `;
                 reviewSection.appendChild(itemContainer);
+                items[itemId] = { price: itemPrice, quantity: 1 };
             } else {
                 adjustQuantity(itemId, itemPrice, 1);
             }
@@ -200,25 +192,24 @@
         }
 
         function adjustQuantity(itemId, itemPrice, delta) {
-            const itemContainer = document.querySelector(`#review-section [data-id='${itemId}']`);
-            let quantity = parseInt(document.getElementById(`quantity-${itemId}`).textContent) + delta;
-            
+            const quantityElement = document.getElementById(`quantity-${itemId}`);
+            let quantity = parseInt(quantityElement.textContent) + delta;
+
             if (quantity <= 0) {
-                itemContainer.remove();
+                document.querySelector(`#review-section [data-id='${itemId}']`).remove();
+                delete items[itemId];
             } else {
-                document.getElementById(`quantity-${itemId}`).textContent = quantity;
+                quantityElement.textContent = quantity;
                 document.getElementById(`hidden-quantity-${itemId}`).value = quantity;
+                items[itemId].quantity = quantity;
             }
-            
             updateTotal();
         }
 
         function updateTotal() {
             let total = 0;
-            document.querySelectorAll('#review-section .quantity-control').forEach(itemContainer => {
-                const itemPrice = parseFloat(itemContainer.querySelector('span').textContent.split('₱')[1]);
-                const quantity = parseInt(itemContainer.querySelector('input[name="quantity"]').value);
-                total += itemPrice * quantity;
+            Object.values(items).forEach(item => {
+                total += item.price * item.quantity;
             });
             document.getElementById('total').innerText = 'Total: ₱' + total.toFixed(2);
             calculateChange();
@@ -236,15 +227,15 @@
             const moneyReceived = parseFloat(document.getElementById('money_received').value) || 0;
 
             if (total <= 0) {
-                event.preventDefault();
                 alert("Please add at least one item to the transaction.");
-                return;
+                return false;
             }
 
-            if (!moneyReceived || moneyReceived < total) {
-                event.preventDefault();
+            if (moneyReceived < total) {
                 alert("Please enter a valid amount of money received.");
+                return false;
             }
+            return true;
         }
 
         function filterItems() {

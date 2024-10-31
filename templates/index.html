@@ -151,6 +151,12 @@
 
         <div id="total">Total: ₱0.00</div>
 
+        <label for="payment_mode">Payment Mode:</label>
+        <select name="payment_mode" id="payment_mode">
+            <option value="CASH" selected>CASH</option>
+            <option value="GCASH">GCASH</option>
+        </select>
+
         <label for="money_received">Money Received:</label>
         <input type="number" name="money_received" id="money_received" oninput="calculateChange()">
 

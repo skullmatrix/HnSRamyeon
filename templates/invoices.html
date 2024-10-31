@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
+            background-color: #f0f4f8;
             color: #343a40;
             max-width: 95%;
             margin: auto;
@@ -17,28 +17,53 @@
             text-align: center;
             font-size: 32px;
             color: #495057;
-        }
-        .filter-bar {
             margin-bottom: 20px;
+        }
+        .button-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .back-button {
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
             text-align: center;
         }
-        .filter-bar select, .filter-bar input[type="date"] {
-            padding: 10px;
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .filter-bar label, .filter-bar select, .filter-bar input[type="date"] {
             font-size: 16px;
+            color: #495057;
+        }
+        .filter-bar select, .filter-bar input[type="date"] {
+            padding: 8px;
             border-radius: 5px;
             border: 1px solid #ced4da;
-            margin: 0 5px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            background-color: #fff;
         }
         table, th, td {
             border: 1px solid #ced4da;
         }
         th, td {
-            padding: 10px;
+            padding: 12px;
             text-align: left;
         }
         th {
@@ -46,16 +71,24 @@
         }
         .total-row {
             font-weight: bold;
+            background-color: #f1f3f5;
         }
     </style>
 </head>
 <body>
     <h1>Invoices</h1>
 
+    <div class="button-bar">
+        <a href="index.html" class="back-button">Back to Index</a>
+    </div>
+
     <div class="filter-bar">
-        <label for="date-filter">Filter by Date:</label>
-        <input type="date" id="date-filter" onchange="filterInvoices()" />
-        
+        <label for="date-from">Date From:</label>
+        <input type="date" id="date-from" onchange="filterInvoices()" />
+
+        <label for="date-to">Date To:</label>
+        <input type="date" id="date-to" onchange="filterInvoices()" />
+
         <label for="payment-mode-filter">Filter by Mode:</label>
         <select id="payment-mode-filter" onchange="filterInvoices()">
             <option value="all">All</option>
@@ -96,7 +129,8 @@
 
     <script>
         function filterInvoices() {
-            const dateFilter = document.getElementById("date-filter").value;
+            const dateFrom = document.getElementById("date-from").value;
+            const dateTo = document.getElementById("date-to").value;
             const modeFilter = document.getElementById("payment-mode-filter").value;
             const rows = document.querySelectorAll("#invoice-table-body tr");
             let total = 0;
@@ -107,7 +141,7 @@
                 const amount = parseFloat(row.querySelector(".total-cell").textContent.replace('₱', ''));
 
                 const matchesMode = modeFilter === "all" || mode === modeFilter;
-                const matchesDate = !dateFilter || date === dateFilter;
+                const matchesDate = (!dateFrom || date >= dateFrom) && (!dateTo || date <= dateTo);
 
                 if (matchesMode && matchesDate) {
                     row.style.display = "table-row";

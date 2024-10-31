@@ -36,6 +36,14 @@ def initialize_database():
         items TEXT NOT NULL
     );
     ''')
+
+    # Add mode column to invoices if it doesn't exist
+    try:
+        conn.execute('ALTER TABLE invoices ADD COLUMN mode TEXT')
+    except sqlite3.OperationalError:
+        # Column already exists
+        pass
+
     conn.commit()
 
     # Populate items if the table is empty

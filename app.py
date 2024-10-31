@@ -33,8 +33,7 @@ def initialize_database():
         money_received INTEGER NOT NULL,
         change INTEGER NOT NULL,
         time TEXT NOT NULL,
-        items TEXT NOT NULL,
-        payment_mode TEXT NOT NULL
+        items TEXT NOT NULL
     );
     ''')
     conn.commit()
@@ -146,39 +145,56 @@ def inventory():
 if __name__ == '__main__':
     app.run(debug=True)
 
-# Existing routes and functionalities here...
-
-# Route for making a transaction and saving it to the invoices table
 @app.route('/make_transaction', methods=['POST'])
 def make_transaction():
-    items = request.form.getlist('item_id')
+    item_ids = request.form.getlist('item_id')
     quantities = request.form.getlist('quantity')
-    total = float(request.form.get('total'))
-    money_received = float(request.form.get('money_received'))
-    payment_mode = request.form.get('payment_mode')
-
-    change = max(0, money_received - total)
-    transaction_time = datetime.now(pytz.timezone('Asia/Manila')).strftime("%Y-%m-%d %H:%M:%S")
-
-    # Prepare items data as a string for storage
-    items_data = ', '.join([f"{item_id}:{qty}" for item_id, qty in zip(items, quantities)])
-
-    # Save transaction to the database
+    money_received = int(request.form['money_received'])
     conn = get_db_connection()
-    conn.execute('''
-    INSERT INTO invoices (total, money_received, change, time, items, payment_mode)
-    VALUES (?, ?, ?, ?, ?, ?)
-    ''', (total, money_received, change, transaction_time, items_data, payment_mode))
+    total = 0
+    items_purchased = []
+
+    # Calculate total and build items purchased details
+    for i, item_id in enumerate(item_ids):
+        item = conn.execute('SELECT * FROM items WHERE id = ?', (item_id,)).fetchone()
+        
+        # Ensure the item was fetched successfully
+        if item is None:
+            print(f"Error: Item with ID {item_id} not found in database.")
+            continue  # Skip this item if not found
+
+        quantity = int(quantities[i])
+        item_total = item['price'] * quantity
+        total += item_total
+        items_purchased.append((item['name'], item['price'], quantity, item_total))
+
+        # Update inventory: subtract quantity from each item in stock
+        conn.execute('UPDATE items SET quantity = quantity - ? WHERE id = ?', (quantity, item_id))
+
+    # Calculate change
+    change = max(0, money_received - total)
+
+    # Timestamp in Philippine timezone
+    philippine_tz = pytz.timezone('Asia/Manila')
+    purchase_time = datetime.now(philippine_tz).strftime('%Y-%m-%d %H:%M:%S')
+
+    # Prepare items details for invoice
+    items_details = ', '.join([f"{name} (x{quantity}) P{item_total}" for name, price, quantity, item_total in items_purchased])
+
+    # Insert invoice record
+    conn.execute('INSERT INTO invoices (total, money_received, change, time, items) VALUES (?, ?, ?, ?, ?)',
+                 (total, money_received, change, purchase_time, items_details))
+
+    # Commit and close connection
     conn.commit()
     conn.close()
+    
+    return redirect(url_for('index'))
 
-    return redirect(url_for('invoices'))
-
-# Route to display the invoices page
-@app.route('/invoices')
+@app.route('/invoices', methods=['GET'])
 def invoices():
     conn = get_db_connection()
-    invoices = conn.execute('SELECT * FROM invoices').fetchall()
+    invoices = conn.execute('SELECT * FROM invoices ORDER BY time DESC').fetchall()
     conn.close()
     return render_template('invoices.html', invoices=invoices)
 

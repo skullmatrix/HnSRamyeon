@@ -7,124 +7,111 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
+            background-color: #f8f9fa;
+            color: #343a40;
+            max-width: 95%;
             margin: auto;
             padding: 20px;
-            background-color: #f3e5f5;
-            color: #4a148c;
         }
         h1 {
             text-align: center;
-            color: #6a1b9a;
+            font-size: 32px;
+            color: #495057;
         }
-        .nav {
-            text-align: right;
+        .filter-bar {
             margin-bottom: 20px;
+            text-align: center;
         }
-        .nav a, .button {
-            padding: 10px 15px;
-            background-color: #6a1b9a; /* Updated to match the export button */
-            color: white;
-            text-decoration: none;
+        .filter-bar select {
+            padding: 10px;
+            font-size: 16px;
             border-radius: 5px;
-            font-weight: bold;
-            margin-left: 10px; /* Add some spacing between buttons */
-        }
-        .nav a:hover, .button:hover {
-            background-color: #4a148c;
+            border: 1px solid #ced4da;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            background-color: #e1bee7;
-            border-radius: 8px;
+        }
+        table, th, td {
+            border: 1px solid #ced4da;
         }
         th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
+            padding: 10px;
             text-align: left;
         }
         th {
-            background-color: #8e24aa;
-            color: white;
+            background-color: #e9ecef;
         }
-        .filter-container {
-            margin-bottom: 20px;
-        }
-        .filter-container label {
+        .total-row {
             font-weight: bold;
-            color: black; /* Black text color for labels */
-        }
-        .filter-container input {
-            padding: 8px;
-            margin-left: 10px;
-            background-color: white; /* White background for inputs */
-            color: black; /* Black text color for inputs */
-            border: 1px solid #8e24aa;
-            border-radius: 5px;
         }
     </style>
 </head>
 <body>
     <h1>Invoices</h1>
 
-    <div class="nav">
-        <a href="/" class="button">Back</a>
-        <button class="button" onclick="exportInvoices()">Export</button> <!-- Changed to "Export" -->
+    <div class="filter-bar">
+        <label for="payment-mode-filter">Filter by Mode of Payment:</label>
+        <select id="payment-mode-filter" onchange="filterInvoices()">
+            <option value="all">All</option>
+            <option value="CASH">CASH</option>
+            <option value="GCASH">GCASH</option>
+        </select>
     </div>
 
-    <div class="filter-container">
-        <label for="from-date">From:</label>
-        <input type="date" id="from-date" onchange="filterInvoices()">
-        <label for="to-date">To:</label>
-        <input type="date" id="to-date" onchange="filterInvoices()">
-    </div>
-
-    <table id="invoices-table">
-        <tr>
-            <th>ID</th>
-            <th>Date & Time</th>
-            <th>Total</th>
-            <th>Money Received</th>
-            <th>Change</th>
-            <th>Items Purchased</th>
-        </tr>
-        {% for invoice in invoices %}
-        <tr class="invoice-row" data-date="{{ invoice['time'] }}">
-            <td>{{ invoice['id'] }}</td>
-            <td>{{ invoice['time'] }}</td>
-            <td>₱{{ invoice['total'] }}</td>
-            <td>₱{{ invoice['money_received'] }}</td>
-            <td>₱{{ invoice['change'] }}</td>
-            <td>{{ invoice['items'] }}</td>
-        </tr>
-        {% endfor %}
+    <table>
+        <thead>
+            <tr>
+                <th>Invoice ID</th>
+                <th>Date</th>
+                <th>Total</th>
+                <th>Mode of Payment</th>
+            </tr>
+        </thead>
+        <tbody id="invoice-table-body">
+            {% for invoice in invoices %}
+            <tr data-payment-mode="{{ invoice.payment_mode }}">
+                <td>{{ invoice.id }}</td>
+                <td>{{ invoice.date }}</td>
+                <td class="total-cell">₱{{ invoice.total }}</td>
+                <td>{{ invoice.payment_mode }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr class="total-row">
+                <td colspan="2">Grand Total</td>
+                <td id="grand-total">₱0.00</td>
+                <td></td>
+            </tr>
+        </tfoot>
     </table>
 
     <script>
         function filterInvoices() {
-            const fromDate = document.getElementById('from-date').value;
-            const toDate = document.getElementById('to-date').value;
-            const rows = document.querySelectorAll('.invoice-row');
+            const filter = document.getElementById("payment-mode-filter").value;
+            const rows = document.querySelectorAll("#invoice-table-body tr");
+            let total = 0;
 
             rows.forEach(row => {
-                const date = row.getAttribute('data-date').split(' ')[0]; // Get only the date part
-                if ((fromDate && date < fromDate) || (toDate && date > toDate)) {
-                    row.style.display = 'none'; // Hide the row
+                const mode = row.getAttribute("data-payment-mode");
+                const amount = parseFloat(row.querySelector(".total-cell").textContent.replace('₱', ''));
+
+                if (filter === "all" || mode === filter) {
+                    row.style.display = "table-row";
+                    total += amount;  // Add to total if row is visible
                 } else {
-                    row.style.display = ''; // Show the row
+                    row.style.display = "none";
                 }
             });
+
+            // Update the grand total display
+            document.getElementById("grand-total").textContent = '₱' + total.toFixed(2);
         }
 
-        function exportInvoices() {
-            const fromDate = document.getElementById('from-date').value;
-            const toDate = document.getElementById('to-date').value;
-
-            // Redirect to the export endpoint with date parameters
-            window.location.href = `/export_invoices?from=${fromDate}&to=${toDate}`;
-        }
+        // Initial calculation when the page loads
+        filterInvoices();
     </script>
 </body>
 </html>

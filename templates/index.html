@@ -7,8 +7,8 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f3e5f5;
-            color: #4a148c;
+            background-color: #f8f9fa;
+            color: #343a40;
             max-width: 95%;
             margin: auto;
             padding: 20px;
@@ -16,7 +16,7 @@
         h1 {
             text-align: center;
             font-size: 32px;
-            color: #6a1b9a;
+            color: #495057;
         }
         nav {
             display: flex;
@@ -26,7 +26,7 @@
         }
         nav a {
             padding: 10px 15px;
-            background-color: #8e24aa;
+            background-color: #6c757d;
             color: white;
             text-decoration: none;
             border-radius: 5px;
@@ -34,7 +34,7 @@
         .item-type {
             margin-top: 10px;
             padding: 8px;
-            background-color: #e1bee7;
+            background-color: #e9ecef;
             border-radius: 8px;
         }
         .item-button {
@@ -44,7 +44,7 @@
             padding: 10px;
             margin: 5px;
             font-size: 16px;
-            background-color: #8e24aa;
+            background-color: #6c757d;
             color: white;
             border: none;
             text-align: center;
@@ -59,10 +59,10 @@
             padding: 10px;
             width: 80%;
             border-radius: 5px;
-            border: 1px solid #8e24aa;
+            border: 1px solid #ced4da;
         }
         #review-section {
-            background-color: #e0e0e0;
+            background-color: #e9ecef;
             padding: 10px;
             border-radius: 8px;
             margin-top: 10px;
@@ -83,7 +83,7 @@
             height: 30px;
             font-size: 18px;
             border: none;
-            background-color: #8e24aa;
+            background-color: #6c757d;
             color: white;
             border-radius: 5px;
             cursor: pointer;
@@ -101,18 +101,26 @@
             font-size: 16px;
             margin-top: 10px;
             border-radius: 5px;
-            border: 1px solid #8e24aa;
+            border: 1px solid #ced4da;
         }
         .submit-button {
             width: 100%;
             padding: 15px;
             font-size: 18px;
-            background-color: #6a1b9a;
+            background-color: #495057;
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             margin-top: 20px;
+        }
+        #payment-mode {
+            width: 80%;
+            padding: 10px;
+            font-size: 16px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
         }
     </style>
 </head>
@@ -155,6 +163,12 @@
         <input type="number" name="money_received" id="money_received" oninput="calculateChange()">
 
         <div id="change">Change: ₱0.00</div>
+
+        <label for="payment-mode">Mode of Payment:</label>
+        <select id="payment-mode" name="payment_mode">
+            <option value="CASH" selected>CASH</option>
+            <option value="GCASH">GCASH</option>
+        </select>
 
         <button type="submit" class="submit-button">Make Transaction</button>
     </form>

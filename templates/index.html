@@ -30,6 +30,10 @@
             color: white;
             text-decoration: none;
             border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        nav a:hover {
+            background-color: #5a6f85;  /* Darker shade on hover */
         }
         .item-type {
             margin-top: 10px;
@@ -50,6 +54,10 @@
             text-align: center;
             border-radius: 8px;
             cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .item-button:hover {
+            background-color: #5a6f85;  /* Darker shade on hover */
         }
         .search-bar {
             text-align: center;
@@ -113,6 +121,10 @@
             border-radius: 8px;
             cursor: pointer;
             margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+        .submit-button:hover {
+            background-color: #484848;  /* Darker shade on hover */
         }
         /* New style for payment mode dropdown */
         #payment_mode {
@@ -122,6 +134,13 @@
             border-radius: 5px;
             border: 1px solid #6a8eaa;
             margin-top: 10px;  /* Spacing above the dropdown */
+        }
+        /* Container for payment inputs */
+        .payment-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;  /* Spacing above payment container */
         }
     </style>
 </head>
@@ -160,14 +179,16 @@
 
         <div id="total">Total: ₱0.00</div>
 
-        <label for="payment_mode">Payment Mode:</label>
-        <select name="payment_mode" id="payment_mode">
-            <option value="CASH" selected>CASH</option>
-            <option value="GCASH">GCASH</option>
-        </select>
+        <div class="payment-container">
+            <label for="payment_mode">Payment Mode:</label>
+            <select name="payment_mode" id="payment_mode">
+                <option value="CASH" selected>CASH</option>
+                <option value="GCASH">GCASH</option>
+            </select>
 
-        <label for="money_received">Money Received:</label>
-        <input type="number" name="money_received" id="money_received" oninput="calculateChange()">
+            <label for="money_received">Money Received:</label>
+            <input type="number" name="money_received" id="money_received" oninput="calculateChange()">
+        </div>
 
         <div id="change">Change: ₱0.00</div>
 

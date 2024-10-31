@@ -164,11 +164,11 @@
 
         <div id="change">Change: ₱0.00</div>
 
-        <label for="payment-mode">Mode of Payment:</label>
-        <select id="payment-mode" name="payment_mode">
-            <option value="CASH" selected>CASH</option>
-            <option value="GCASH">GCASH</option>
-        </select>
+<label for="payment-mode">Mode of Payment:</label>
+<select id="payment-mode" name="mode">  <!-- Ensure name="mode" here -->
+    <option value="CASH" selected>CASH</option>
+    <option value="GCASH">GCASH</option>
+</select>
 
         <button type="submit" class="submit-button">Make Transaction</button>
     </form>

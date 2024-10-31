@@ -22,11 +22,12 @@
             margin-bottom: 20px;
             text-align: center;
         }
-        .filter-bar select {
+        .filter-bar select, .filter-bar input[type="date"] {
             padding: 10px;
             font-size: 16px;
             border-radius: 5px;
             border: 1px solid #ced4da;
+            margin: 0 5px;
         }
         table {
             width: 100%;
@@ -52,6 +53,9 @@
     <h1>Invoices</h1>
 
     <div class="filter-bar">
+        <label for="date-filter">Filter by Date:</label>
+        <input type="date" id="date-filter" onchange="filterInvoices()" />
+        
         <label for="payment-mode-filter">Filter by Mode:</label>
         <select id="payment-mode-filter" onchange="filterInvoices()">
             <option value="all">All</option>
@@ -67,21 +71,23 @@
                 <th>Date</th>
                 <th>Total</th>
                 <th>Mode</th>
+                <th>Money Received</th>
             </tr>
         </thead>
         <tbody id="invoice-table-body">
             {% for invoice in invoices %}
-            <tr data-payment-mode="{{ invoice.payment_mode }}">
+            <tr data-payment-mode="{{ invoice.payment_mode }}" data-date="{{ invoice.date }}">
                 <td>{{ invoice.id }}</td>
                 <td>{{ invoice.date }}</td>
                 <td class="total-cell">₱{{ invoice.total }}</td>
                 <td>{{ invoice.payment_mode }}</td>
+                <td>₱{{ invoice.money_received }}</td>
             </tr>
             {% endfor %}
         </tbody>
         <tfoot>
             <tr class="total-row">
-                <td colspan="2">Grand Total</td>
+                <td colspan="3">Grand Total</td>
                 <td id="grand-total">₱0.00</td>
                 <td></td>
             </tr>
@@ -90,15 +96,20 @@
 
     <script>
         function filterInvoices() {
-            const filter = document.getElementById("payment-mode-filter").value;
+            const dateFilter = document.getElementById("date-filter").value;
+            const modeFilter = document.getElementById("payment-mode-filter").value;
             const rows = document.querySelectorAll("#invoice-table-body tr");
             let total = 0;
 
             rows.forEach(row => {
                 const mode = row.getAttribute("data-payment-mode");
+                const date = row.getAttribute("data-date");
                 const amount = parseFloat(row.querySelector(".total-cell").textContent.replace('₱', ''));
 
-                if (filter === "all" || mode === filter) {
+                const matchesMode = modeFilter === "all" || mode === modeFilter;
+                const matchesDate = !dateFilter || date === dateFilter;
+
+                if (matchesMode && matchesDate) {
                     row.style.display = "table-row";
                     total += amount;  // Add to total if row is visible
                 } else {

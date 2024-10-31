@@ -182,9 +182,12 @@ def make_transaction():
     # Prepare items details for invoice
     items_details = ', '.join([f"{name} (x{quantity}) P{item_total}" for name, price, quantity, item_total in items_purchased])
 
-    # Insert invoice record with payment mode
-    conn.execute('INSERT INTO invoices (total, money_received, change, time, items, payment_mode) VALUES (?, ?, ?, ?, ?, ?)',
-                 (total, money_received, change, purchase_time, items_details, payment_mode))
+    # Insert invoice record
+    conn.execute('INSERT INTO invoices (total, money_received, change, time, items) VALUES (?, ?, ?, ?, ?)',
+                 (total, money_received, change, purchase_time, items_details))
+    
+    # Update the last inserted invoice with the payment mode
+    conn.execute('UPDATE invoices SET payment_mode = ? WHERE id = (SELECT MAX(id) FROM invoices)', (payment_mode,))
 
     # Commit and close connection
     conn.commit()

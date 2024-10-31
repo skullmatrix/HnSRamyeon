@@ -137,7 +137,8 @@
         <input type="text" id="search_query" placeholder="Search for items..." oninput="filterItems()">
     </div>
 
-    <form action="/make_transaction" method="POST" onsubmit="validateForm(event)">
+    <!-- Main Form for Making Transaction -->
+    <form action="/make_transaction" method="POST">
         {% for type in ['Soup Base', 'Stir Fry', 'Cups', 'Toppings', 'Sweets', 'Drinks'] %}
         <div class="item-type">
             <h3>{{ type }}</h3>
@@ -164,15 +165,17 @@
 
         <div id="change">Change: ₱0.00</div>
 
-<label for="payment-mode">Mode of Payment:</label>
-<select id="payment-mode" name="mode">  <!-- Ensure name="mode" here -->
-    <option value="CASH" selected>CASH</option>
-    <option value="GCASH">GCASH</option>
-</select>
+        <!-- Mode of Payment Dropdown -->
+        <label for="payment-mode">Mode of Payment:</label>
+        <select id="payment-mode" name="mode">  <!-- Ensure name="mode" here -->
+            <option value="CASH" selected>CASH</option>
+            <option value="GCASH">GCASH</option>
+        </select>
 
         <button type="submit" class="submit-button">Make Transaction</button>
     </form>
 
+    <!-- JavaScript Functions -->
     <script>
         function addItemToTransaction(itemId, itemName, itemPrice) {
             const reviewSection = document.getElementById('review-section');

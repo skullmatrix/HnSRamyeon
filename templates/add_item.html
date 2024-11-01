@@ -72,23 +72,22 @@
             padding: 0; /* Remove padding */
         }
         .item-entry {
-            border-bottom: 1px solid #d1c4e9;
             padding: 10px 0; /* Adjusted padding for item entries */
             display: flex;
             justify-content: space-between;
             align-items: center;
+            /* Removed border-bottom */
         }
         .edit-button {
-            padding: 8px 12px;
-            background-color: #6a8eaa;  /* Softer button color */
-            color: white;
-            border: none;
-            border-radius: 5px;
+            padding: 0; /* Remove padding */
+            background-color: transparent; /* Make the background transparent */
+            color: #6a8eaa; /* Match the text color */
+            border: none; /* Remove border */
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: color 0.3s; /* Change color on hover */
         }
         .edit-button:hover {
-            background-color: #5a6f85;  /* Darker shade on hover */
+            color: #5a6f85; /* Darker shade on hover */
         }
     </style>
     <script>

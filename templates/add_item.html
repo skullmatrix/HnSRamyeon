@@ -68,6 +68,8 @@
         }
         .item-list {
             margin-top: 20px;
+            list-style-type: none; /* Remove default list styling */
+            padding: 0; /* Remove padding */
         }
         .item-entry {
             border-bottom: 1px solid #d1c4e9;
@@ -132,16 +134,16 @@
         <input type="text" id="search" onkeyup="filterItems()" placeholder="Search for items..." />
     </div>
 
-    <div class="item-list">
+    <ul class="item-list">
         <h3>Existing Items</h3>
         {% for item in items %}
-            <div class="item-entry">
+            <li class="item-entry">
                 <span>{{ item['name'] }} - ₱{{ item['price'] }}</span>
                 <form action="/edit_item/{{ item['id'] }}" method="GET" style="display: inline;">
                     <button class="edit-button" type="submit">Edit</button>
                 </form>
-            </div>
+            </li>
         {% endfor %}
-    </div>
+    </ul>
 </body>
 </html>

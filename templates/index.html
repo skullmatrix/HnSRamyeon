@@ -40,15 +40,18 @@
             padding: 8px;
             background-color: #e7f1f5;  /* Softer item type background */
             border-radius: 8px;
+            display: flex; /* Use flexbox for alignment */
+            flex-wrap: wrap; /* Allow items to wrap to the next line */
+            gap: 10px; /* Space between buttons */
         }
         .item-button {
             display: flex; /* Use flexbox for alignment */
             justify-content: center; /* Center the text */
             align-items: center; /* Center vertically */
-            width: 43%;
+            width: calc(50% - 5px); /* Two buttons per row with space accounted for */
             height: 70px;
             padding: 10px;
-            margin: 5px;
+            margin: 0; /* Remove margin */
             background-color: #6a8eaa;  /* Softer item button color */
             color: white;
             border: none;

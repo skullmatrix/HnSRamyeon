@@ -40,24 +40,31 @@
             padding: 8px;
             background-color: #e7f1f5;  /* Softer item type background */
             border-radius: 8px;
+            display: flex; /* Use flexbox for alignment */
+            flex-direction: column; /* Stack title and buttons vertically */
+        }
+        .item-type h3 {
+            margin: 0 0 10px; /* Space between title and buttons */
         }
         .item-button {
-            display: inline-block;
-            width: 43%;
+            display: flex; /* Use flexbox for alignment */
+            justify-content: center; /* Center the text */
+            align-items: center; /* Center vertically */
+            width: calc(50% - 5px); /* Two buttons per row */
             height: 70px;
             padding: 10px;
-            margin: 5px;
-            font-size: 16px;
             background-color: #6a8eaa;  /* Softer item button color */
             color: white;
             border: none;
-            text-align: center;
             border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            font-size: clamp(14px, 2vw, 18px); /* Responsive font size */
+            text-align: center;
+            transition: background-color 0.3s; /* Transition for hover effect */
+            margin-bottom: 10px; /* Space between buttons */
         }
         .item-button:hover {
-            background-color: #5a6f85;  /* Darker shade on hover */
+            background-color: #5a6f85; /* Darker shade on hover */
         }
         .search-bar {
             text-align: center;
@@ -121,10 +128,6 @@
             border-radius: 8px;
             cursor: pointer;
             margin-top: 20px;
-            transition: background-color 0.3s;
-        }
-        .submit-button:hover {
-            background-color: #484848;  /* Darker shade on hover */
         }
         /* New style for payment mode dropdown */
         #payment_mode {
@@ -134,13 +137,6 @@
             border-radius: 5px;
             border: 1px solid #6a8eaa;
             margin-top: 10px;  /* Spacing above the dropdown */
-        }
-        /* Container for payment inputs */
-        .payment-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 20px;  /* Spacing above payment container */
         }
     </style>
 </head>
@@ -161,7 +157,7 @@
         {% for type in ['Soup Base', 'Stir Fry', 'Cups', 'Toppings', 'Sweets', 'Drinks'] %}
         <div class="item-type">
             <h3>{{ type }}</h3>
-            <div>
+            <div class="item-container">
                 {% for item in items %}
                 {% if item['type'] == type %}
                 <button type="button" class="item-button" data-name="{{ item['name'] }}" data-price="{{ item['price'] }}" onclick="addItemToTransaction('{{ item['id'] }}', '{{ item['name'] }}', {{ item['price'] }})">

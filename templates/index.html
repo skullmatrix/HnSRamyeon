@@ -45,13 +45,9 @@
             gap: 10px; /* Space between buttons */
         }
         .item-button {
-            display: flex; /* Use flexbox for alignment */
-            justify-content: center; /* Center the text */
-            align-items: center; /* Center vertically */
-            width: calc(50% - 5px); /* Two buttons per row with space accounted for */
+            flex: 0 1 calc(50% - 5px); /* Two buttons per row */
             height: 70px;
             padding: 10px;
-            margin: 0; /* Remove margin */
             background-color: #6a8eaa;  /* Softer item button color */
             color: white;
             border: none;

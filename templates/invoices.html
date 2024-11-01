@@ -7,15 +7,16 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
+            max-width: 95%;
             margin: auto;
             padding: 20px;
-            background-color: #f3e5f5;
-            color: #4a148c;
+            background-color: #f3f3f3;  /* Softer background color */
+            color: #333;  /* Darker text color for better contrast */
         }
         h1 {
             text-align: center;
-            color: #6a1b9a;
+            color: #5a5a5a;  /* Softer title color */
+            font-size: 32px;
         }
         .nav {
             text-align: right;
@@ -23,52 +24,56 @@
         }
         .nav a, .button {
             padding: 10px 15px;
-            background-color: #6a1b9a;
+            background-color: #6a8eaa;  /* Softer button color */
             color: white;
             text-decoration: none;
             border-radius: 5px;
             font-weight: bold;
             margin-left: 10px;
+            transition: background-color 0.3s; /* Add transition for hover effect */
         }
         .nav a:hover, .button:hover {
-            background-color: #4a148c;
+            background-color: #5a6f85;  /* Darker shade on hover */
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            background-color: #e1bee7;
+            background-color: #e7f1f5;  /* Softer table background */
             border-radius: 8px;
         }
         th, td {
             border: 1px solid #ddd;
-            padding: 8px;
+            padding: 12px;  /* Increased padding for better readability */
             text-align: left;
         }
         th {
-            background-color: #8e24aa;
+            background-color: #6a8eaa;  /* Softer header background color */
             color: white;
         }
         .filter-container {
             margin-bottom: 20px;
+            display: flex;  /* Flexbox for filter container */
+            align-items: center;
         }
         .filter-container label {
             font-weight: bold;
             color: black;
+            margin-right: 5px; /* Space between label and input */
         }
         .filter-container input, .filter-container select {
-            padding: 8px;
+            padding: 10px;  /* Increased padding for better usability */
             margin-left: 10px;
             background-color: white;
             color: black;
-            border: 1px solid #8e24aa;
+            border: 1px solid #6a8eaa;  /* Softer input border */
             border-radius: 5px;
         }
         .grand-total {
             text-align: right;
             font-size: 18px;
             font-weight: bold;
-            color: #4a148c;
+            color: #4a148c;  /* Darker color for grand total */
             margin-top: 20px;
         }
     </style>

@@ -72,22 +72,24 @@
             padding: 0; /* Remove padding */
         }
         .item-entry {
-            padding: 10px 0; /* Adjusted padding for item entries */
+            padding: 5px 0; /* Adjusted padding for item entries */
             display: flex;
             justify-content: space-between;
             align-items: center;
-            /* Removed border-bottom */
+            margin-bottom: 5px; /* Added margin to separate items */
         }
         .edit-button {
-            padding: 0; /* Remove padding */
-            background-color: transparent; /* Make the background transparent */
-            color: #6a8eaa; /* Match the text color */
+            padding: 5px 10px; /* Adjust padding for a smaller button */
+            background-color: #6a8eaa; /* Set to match the desired button color */
+            color: white; /* Set text color to white */
             border: none; /* Remove border */
+            border-radius: 5px; /* Rounded corners */
             cursor: pointer;
-            transition: color 0.3s; /* Change color on hover */
+            transition: background-color 0.3s; /* Change background color on hover */
+            font-size: 14px; /* Adjust font size for better fit */
         }
         .edit-button:hover {
-            color: #5a6f85; /* Darker shade on hover */
+            background-color: #5a6f85; /* Darker shade on hover */
         }
     </style>
     <script>

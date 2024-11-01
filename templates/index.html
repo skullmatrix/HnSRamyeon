@@ -46,12 +46,14 @@
         .item-type h3 {
             margin: 0 0 10px; /* Space between title and buttons */
         }
+        .item-container {
+            display: flex; /* Flex container for items */
+            flex-wrap: wrap; /* Allow items to wrap to the next line */
+            justify-content: space-between; /* Space between buttons */
+        }
         .item-button {
-            display: flex; /* Use flexbox for alignment */
-            justify-content: center; /* Center the text */
-            align-items: center; /* Center vertically */
-            width: calc(50% - 5px); /* Two buttons per row */
-            height: 70px;
+            flex: 0 1 calc(50% - 5px); /* Two buttons per row with space */
+            height: 70px; /* Fixed height for buttons */
             padding: 10px;
             background-color: #6a8eaa;  /* Softer item button color */
             color: white;
@@ -61,7 +63,7 @@
             font-size: clamp(14px, 2vw, 18px); /* Responsive font size */
             text-align: center;
             transition: background-color 0.3s; /* Transition for hover effect */
-            margin-bottom: 10px; /* Space between buttons */
+            margin-bottom: 10px; /* Space between rows of buttons */
         }
         .item-button:hover {
             background-color: #5a6f85; /* Darker shade on hover */

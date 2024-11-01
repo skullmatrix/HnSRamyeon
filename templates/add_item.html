@@ -7,33 +7,28 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f3f3f3;  /* Softer background color */
-            color: #333;  /* Darker text color for better contrast */
-            max-width: 95%;
+            background-color: #f3e5f5;
+            color: #4a148c;
+            max-width: 600px;
             margin: auto;
             padding: 20px;
         }
         h1 {
-            color: #5a5a5a;  /* Softer title color */
+            color: #6a1b9a;
             text-align: center;
-            font-size: 32px;
         }
         .back-button {
             display: inline-block;
             margin-bottom: 15px;
             padding: 8px 12px;
-            background-color: #6a8eaa;  /* Softer button color */
+            background-color: #8e24aa;
             color: white;
             text-decoration: none;
             border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-        .back-button:hover {
-            background-color: #5a6f85;  /* Darker shade on hover */
         }
         form {
             padding: 15px;
-            background-color: #e7f1f5;  /* Softer form background */
+            background-color: #e1bee7;
             border-radius: 8px;
             margin-top: 20px;
         }
@@ -44,65 +39,47 @@
         }
         input[type="text"], input[type="number"], select {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #6a8eaa;  /* Softer input border */
-            border-radius: 5px;
-            box-sizing: border-box;
+            padding: 12px; /* Increased padding for a larger look */
+            font-size: 16px; /* Set font size for better readability */
+            border: 1px solid #d1c4e9;
+            border-radius: 4px;
+            box-sizing: border-box; /* Ensure padding is included in width */
         }
         button {
             margin-top: 15px;
             padding: 10px 15px;
-            background-color: #6a8eaa;  /* Softer button color */
+            background-color: #8e24aa;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             width: auto; /* Set width to auto for the button */
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #5a6f85;  /* Darker shade on hover */
         }
         .search-container {
             margin-top: 20px;
         }
         .item-list {
             margin-top: 20px;
-            list-style-type: none; /* Remove default list styling */
-            padding: 0; /* Remove padding */
         }
         .item-entry {
-            padding: 5px 0; /* Adjusted padding for item entries */
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 5px; /* Added margin to separate items */
+            border-bottom: 1px solid #d1c4e9;
+            padding: 5px 0; /* Reduced padding for item entries */
         }
         .edit-button {
-            padding: 5px 10px; /* Adjust padding for a smaller button */
-            background-color: #6a8eaa; /* Set to match the desired button color */
-            color: white; /* Set text color to white */
-            border: none; /* Remove border */
-            border-radius: 5px; /* Rounded corners */
+            display: inline-block;
+            width: auto;
+            height: auto;
+            padding: auto;
+            margin: auto;
+            font-size: 16px;
+            background-color: #8e24aa;
+            color: white;
+            border: none;
+            text-align: center;
+            border-radius: auto;
             cursor: pointer;
-            transition: background-color 0.3s; /* Change background color on hover */
-            font-size: 14px; /* Adjust font size for better fit */
-        }
-        .edit-button:hover {
-            background-color: #5a6f85; /* Darker shade on hover */
         }
     </style>
-    <script>
-        function filterItems() {
-            const searchInput = document.getElementById('search').value.toLowerCase();
-            const items = document.querySelectorAll('.item-entry');
-
-            items.forEach(item => {
-                const itemName = item.querySelector('span').textContent.toLowerCase();
-                item.style.display = itemName.includes(searchInput) ? '' : 'none'; // Show or hide the item
-            });
-        }
-    </script>
 </head>
 <body>
     <a href="/" class="back-button">Back</a>
@@ -135,16 +112,16 @@
         <input type="text" id="search" onkeyup="filterItems()" placeholder="Search for items..." />
     </div>
 
-    <ul class="item-list">
+    <div class="item-list">
         <h3>Existing Items</h3>
         {% for item in items %}
-            <li class="item-entry">
+            <div class="item-entry">
                 <span>{{ item['name'] }} - ₱{{ item['price'] }}</span>
                 <form action="/edit_item/{{ item['id'] }}" method="GET" style="display: inline;">
                     <button class="edit-button" type="submit">Edit</button>
                 </form>
-            </li>
+            </div>
         {% endfor %}
-    </ul>
+    </div>
 </body>
 </html>

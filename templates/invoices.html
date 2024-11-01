@@ -18,21 +18,33 @@
             color: #5a5a5a;  /* Softer title color */
             font-size: 32px;
         }
-        .nav {
-            text-align: right;
-            margin-bottom: 20px;
-        }
-        .nav a, .button {
+        .back-button {
             padding: 10px 15px;
             background-color: #6a8eaa;  /* Softer button color */
             color: white;
             text-decoration: none;
             border-radius: 5px;
             font-weight: bold;
-            margin-left: 10px;
+            transition: background-color 0.3s; /* Add transition for hover effect */
+            margin-bottom: 20px; /* Space below the button */
+        }
+        .back-button:hover {
+            background-color: #5a6f85;  /* Darker shade on hover */
+        }
+        .nav {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+        .nav button {
+            padding: 10px 15px;
+            background-color: #6a8eaa;  /* Softer button color */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
             transition: background-color 0.3s; /* Add transition for hover effect */
         }
-        .nav a:hover, .button:hover {
+        .nav button:hover {
             background-color: #5a6f85;  /* Darker shade on hover */
         }
         table {
@@ -79,10 +91,10 @@
     </style>
 </head>
 <body>
+    <a href="/" class="back-button">Back</a>
     <h1>Invoices</h1>
 
     <div class="nav">
-        <a href="/" class="button">Back</a>
         <button class="button" onclick="exportInvoices()">Export</button>
     </div>
 

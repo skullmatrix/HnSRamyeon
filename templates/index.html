@@ -42,22 +42,24 @@
             border-radius: 8px;
         }
         .item-button {
-            display: inline-block;
+            display: flex; /* Use flexbox for alignment */
+            justify-content: center; /* Center the text */
+            align-items: center; /* Center vertically */
             width: 43%;
             height: 70px;
             padding: 10px;
             margin: 5px;
-            font-size: 16px;
             background-color: #6a8eaa;  /* Softer item button color */
             color: white;
             border: none;
-            text-align: center;
             border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            font-size: clamp(14px, 2vw, 18px); /* Responsive font size */
+            text-align: center;
+            transition: background-color 0.3s; /* Transition for hover effect */
         }
         .item-button:hover {
-            background-color: #5a6f85;  /* Darker shade on hover */
+            background-color: #5a6f85; /* Darker shade on hover */
         }
         .search-bar {
             text-align: center;
@@ -121,10 +123,6 @@
             border-radius: 8px;
             cursor: pointer;
             margin-top: 20px;
-            transition: background-color 0.3s;
-        }
-        .submit-button:hover {
-            background-color: #484848;  /* Darker shade on hover */
         }
         /* New style for payment mode dropdown */
         #payment_mode {
@@ -134,13 +132,6 @@
             border-radius: 5px;
             border: 1px solid #6a8eaa;
             margin-top: 10px;  /* Spacing above the dropdown */
-        }
-        /* Container for payment inputs */
-        .payment-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 20px;  /* Spacing above payment container */
         }
     </style>
 </head>
